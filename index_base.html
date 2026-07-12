@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Aplikasi Kasir Warung Sederhana - Kelola pesanan, hitung pemasukan, dan export laporan ke Excel">
+  <title>Kasir Warung - Aplikasi Kasir Sederhana</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff9800">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <!-- CSS_INJECT -->
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <!-- Chart.js for graphics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- ===== WELCOME / LOGIN SCREEN ===== -->
+<div class="welcome-overlay" id="welcome-overlay">
+
+  <!-- === SCREEN 1: PILIH LOGIN === -->
+  <div class="auth-container" id="login-screen">
+    <div class="auth-logo">🏪</div>
+    <h1 class="auth-title">Kasir Warung</h1>
+    <p class="auth-subtitle">Pilih cara masuk Anda</p>
+
+    <!-- Kartu Bos -->
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <span class="auth-card-icon">💼</span>
+        <div>
+          <div class="auth-card-title">Saya Bos / Pemilik</div>
+          <div class="auth-card-desc">Login dengan akun Google Anda</div>
+        </div>
+      </div>
+      <button class="btn-google" id="btn-google-login" onclick="loginWithGoogle()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 010-3.04V5.41H1.83a8 8 0 000 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 001.83 5.4L4.5 7.49a4.77 4.77 0 014.48-3.3z"/></svg>
+        Masuk dengan Google
+      </button>
+    </div>
+
+    <div class="auth-divider"><span>atau</span></div>
+
+    <!-- Kartu Karyawan -->
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <span class="auth-card-icon">🧑‍🍳</span>
+        <div>
+          <div class="auth-card-title">Saya Karyawan</div>
+          <div class="auth-card-desc">Masukkan kode yang diberikan Bos</div>
+        </div>
+      </div>
+      <div class="auth-input-row">
+        <input type="number" id="karyawan-code-input" class="form-input auth-code-input"
+          placeholder="Kode 8 angka"
+          maxlength="8"
+          oninput="if(this.value.length>8)this.value=this.value.slice(0,8)"
+          style="letter-spacing: 3px; font-size: 1.2rem; font-weight: 700; text-align: center;">
+        <button class="btn btn-primary" id="btn-karyawan-login" onclick="loginAsKaryawan()" style="white-space:nowrap; padding: 12px 20px;">
+          ✅ Masuk
+        </button>
+      </div>
+    </div>
+
+    <p class="auth-footer">Kasir Warung · Mandiri &amp; Praktis</p>
+  </div>
+
+  <!-- === SCREEN 2: BUAT WARUNG BARU (muncul setelah Google login pertama kali) === -->
+  <div class="auth-container hidden" id="new-shop-screen">
+    <div class="auth-logo">🏪</div>
+    <h1 class="auth-title">Selamat Datang!</h1>
+    <p class="auth-subtitle">Satu langkah lagi — beri nama warung Anda</p>
+
+    <div class="auth-card">
+      <div class="form-group">
+        <label class="form-label">Nama Warung / Toko</label>
+        <input type="text" class="form-input" id="new-shop-name"
+          placeholder="cth: Warung Jaya Makmur"
+          style="font-size: 1.1rem; font-weight: 600;">
+        <p class="form-hint" style="margin-top: 6px;">Kode karyawan akan otomatis dibuat dan dikirim ke Gmail Anda.</p>
+      </div>
+      <button class="welcome-btn" id="btn-create-shop" onclick="createNewShop()" style="margin-top: 16px;">
+        🚀 Buat Warung &amp; Dapatkan Kode
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<div class="app-container" id="app-container">
+
+  <!-- ===== HEADER ===== -->
+  <header class="app-header">
+    <div class="app-logo">
+      <div class="logo-icon">🏪</div>
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h1 id="shop-title-display">KASIR WARUNG</h1>
+          <button class="edit-name-btn" id="edit-shop-name-btn" onclick="editShopName()" title="Ubah Nama Warung">✏️</button>
+        </div>
+        <div class="subtitle" id="current-date"></div>
+      </div>
+    </div>
+
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-page="kasir" onclick="switchPage('kasir')">
+        <span class="tab-icon">🛒</span>
+        <span class="tab-text">Kasir</span>
+      </button>
+      <button class="nav-tab" data-page="keuangan" id="nav-keuangan" onclick="switchPage('keuangan')">
+        <span class="tab-icon">📊</span>
+        <span class="tab-text">Keuangan</span>
+      </button>
+      <button class="nav-tab" data-page="riwayat" id="nav-riwayat" onclick="switchPage('riwayat')">
+        <span class="tab-icon">📋</span>
+        <span class="tab-text">Riwayat</span>
+      </button>
+      <button class="nav-tab" data-page="menu" onclick="switchPage('menu')">
+        <span class="tab-icon">⚙️</span>
+        <span class="tab-text">Kelola Menu</span>
+      </button>
+    </nav>
+
+    <div class="header-actions">
+      <!-- User Profile & Badge -->
+      <div class="user-role-badge" id="header-user-badge">
+        <img id="user-avatar" src="" alt="" style="display:none; width:28px; height:28px; border-radius:50%; border: 2px solid var(--accent-primary); object-fit:cover;">
+        <span class="badge-role" id="role-badge-text">💼 Bos</span>
+        <span class="badge-token-info" id="token-badge-text" title="Klik untuk salin kode karyawan" onclick="copyEmployeeToken()" style="cursor:pointer;">Kode: — 📋</span>
+      </div>
+      
+      <div class="header-buttons" style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary btn-icon" id="btn-connect-printer" onclick="connectBluetoothPrinter()" title="Sambungkan Printer Bluetooth" style="padding: 8px 14px; font-size: 1.1rem;">
+          🖨️
+        </button>
+        <button class="btn btn-success btn-icon" onclick="exportToExcel()" title="Export ke Excel" style="padding: 8px 14px; font-size: 1.1rem;">
+          📥
+        </button>
+        <button class="btn btn-secondary btn-icon" onclick="logout()" title="Keluar" id="btn-logout" style="padding: 8px 14px; font-size: 1.1rem;">
+          🚪
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== PAGE: KASIR ===== -->
+  <section id="page-kasir" class="page-section active">
+    <div class="kasir-layout">
+
+      <!-- Menu Area -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title"><span class="icon">🍽️</span> Daftar Menu</h2>
+          <button class="btn btn-secondary" onclick="showExpenseModal()" style="padding: 8px 12px; font-size: 0.85rem; border-color: var(--accent-primary); color: var(--accent-primary);">💸 Catat Pengeluaran</button>
+        </div>
+        <div class="category-filters" id="category-filters"></div>
+        <div class="menu-grid" id="menu-grid"></div>
+      </div>
+
+      <!-- Cart Area -->
+      <div class="section-card cart-section">
+        <div class="section-header">
+          <h2 class="section-title"><span class="icon">🛒</span> Keranjang</h2>
+          <button class="btn btn-danger btn-icon" onclick="clearCart()" title="Kosongkan" style="padding:8px 12px;font-size:0.75rem;">🗑</button>
+        </div>
+
+        <div class="cart-items" id="cart-items"></div>
+
+        <div class="cart-footer">
+          <div class="cart-total-row">
+            <span class="cart-total-label">TOTAL</span>
+            <span class="cart-total-amount" id="cart-total">Rp 0</span>
+          </div>
+          <div class="cart-actions" style="display:none;">
+            <!-- Old pay button hidden -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== PAGE: KEUANGAN (Dashboard) ===== -->
+  <section id="page-keuangan" class="page-section">
+
+    <!-- Period Selector -->
+    <div class="flex items-center justify-between mb-8" style="margin-bottom:16px;">
+      <h2 class="section-title" style="font-size:1.1rem;"><span class="icon">📊</span> Dashboard Keuangan</h2>
+      <div class="period-selector">
+        <button class="period-btn active" data-period="hari" onclick="setPeriod('hari')">Hari Ini</button>
+        <button class="period-btn" data-period="minggu" onclick="setPeriod('minggu')">Minggu</button>
+        <button class="period-btn" data-period="bulan" onclick="setPeriod('bulan')">Bulan</button>
+        <button class="period-btn" data-period="semua" onclick="setPeriod('semua')">Semua</button>
+      </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="dashboard-grid">
+      <div class="stat-card accent">
+        <div class="sc-icon">💰</div>
+        <div class="sc-label">Total Pemasukan</div>
+        <div class="sc-value" id="stat-income">Rp 0</div>
+        <div class="sc-sub" id="stat-income-sub">Hari Ini</div>
+      </div>
+      <div class="stat-card success">
+        <div class="sc-icon">🧾</div>
+        <div class="sc-label">Jumlah Transaksi</div>
+        <div class="sc-value" id="stat-txn">0</div>
+        <div class="sc-sub" id="stat-txn-sub">Hari Ini</div>
+      </div>
+      <div class="stat-card info">
+        <div class="sc-icon">📈</div>
+        <div class="sc-label">Rata-rata</div>
+        <div class="sc-value" id="stat-avg">Rp 0</div>
+        <div class="sc-sub" id="stat-avg-sub">per transaksi</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="sc-icon">📦</div>
+        <div class="sc-label">Item Terjual</div>
+        <div class="sc-value" id="stat-items">0</div>
+        <div class="sc-sub" id="stat-items-sub">item terjual</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">📊 Grafik Pemasukan</h3>
+        </div>
+        <div style="height:300px;"><canvas id="income-chart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">🏆 Menu Terlaris</h3>
+        </div>
+        <div style="height:300px;"><canvas id="top-items-chart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Top Items Table -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title"><span class="icon">🥇</span> Top Menu Berdasarkan Pendapatan</h2>
+      </div>
+      <div class="section-body" id="top-items-table"></div>
+    </div>
+
+  </section>
+
+  <!-- ===== PAGE: RIWAYAT ===== -->
+  <section id="page-riwayat" class="page-section">
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title"><span class="icon">📋</span> Riwayat Transaksi</h2>
+        <div class="riwayat-controls">
+          <input type="date" class="date-input" id="history-date">
+        </div>
+      </div>
+      <div class="daily-summary" id="history-summary"></div>
+      <div class="history-list" id="history-list"></div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE: KELOLA MENU ===== -->
+  <section id="page-menu" class="page-section">
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title"><span class="icon">⚙️</span> Kelola Menu</h2>
+        <div class="riwayat-controls">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="menu-search" placeholder="Cari menu...">
+          </div>
+          <button class="btn btn-primary" onclick="showAddMenuModal()">➕ Tambah Menu</button>
+        </div>
+      </div>
+      <div id="menu-manage-list"></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Modal</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<!-- ===== SUCCESS OVERLAY ===== -->
+<div class="success-overlay hidden" id="success-overlay">
+  <div class="success-icon-big">✅</div>
+  <div class="success-text">Transaksi Berhasil!</div>
+  <div class="success-amount" id="success-amount">Rp 0</div>
+</div>
+
+<!-- ===== FLOATING CHECKOUT ===== -->
+<div class="floating-checkout hidden" id="floating-checkout" onclick="startPaymentProcess()">
+  <div class="fc-info">
+    <div class="fc-qty" id="fc-qty">0 Item</div>
+    <div class="fc-total" id="fc-total">Rp 0</div>
+  </div>
+  <div class="fc-action">
+    Bayar ➔
+  </div>
+</div>
+
+<!-- ===== AUTHENTICATION OVERLAY ===== -->
+<div class="auth-overlay hidden" id="auth-overlay">
+  <div class="auth-container">
+    <div class="auth-logo">🏪</div>
+    <h2 class="auth-title" id="auth-title">Memuat...</h2>
+    
+    <!-- Loading View -->
+    <div id="auth-loading-view">
+      <p style="color:var(--text-muted);">Menghubungkan ke server...</p>
+    </div>
+
+    <!-- Setup View -->
+    <div id="auth-setup-view" class="hidden">
+      <p style="margin-bottom: 20px; color: var(--text-secondary); font-size: 0.9rem;">Selamat datang! Sepertinya aplikasi kasir ini belum diatur. Silakan buat warung Anda terlebih dahulu.</p>
+      <div class="form-group" style="text-align: left;">
+        <label class="form-label">Nama Warung</label>
+        <input type="text" class="form-input" id="setup-warung-name" placeholder="cth: Warung Barokah">
+      </div>
+      <div class="form-group" style="text-align: left;">
+        <label class="form-label">Buat PIN Bos (Angka)</label>
+        <input type="password" class="form-input" id="setup-bos-pin" placeholder="cth: 123456" inputmode="numeric">
+      </div>
+      <button class="btn btn-primary" onclick="submitSetup()" style="width: 100%; margin-top: 10px;">🚀 Buat Warung Sekarang</button>
+    </div>
+
+    <!-- Login View -->
+    <div id="auth-login-view" class="hidden">
+      <p style="margin-bottom: 20px; color: var(--text-secondary); font-size: 0.9rem;">Silakan pilih peran untuk masuk ke dalam aplikasi kasir.</p>
+      
+      <div style="display:flex; gap:10px; margin-bottom: 20px;">
+        <button class="btn btn-secondary" id="tab-login-bos" onclick="setLoginTab('bos')" style="flex:1; border-color:var(--accent-primary); color:var(--accent-primary);">👤 Bos</button>
+        <button class="btn btn-secondary" id="tab-login-karyawan" onclick="setLoginTab('karyawan')" style="flex:1;">👨‍💼 Karyawan</button>
+      </div>
+
+      <div id="login-bos-form">
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">Masukkan PIN Bos</label>
+          <input type="password" class="form-input" id="login-bos-pin" placeholder="Masukkan PIN rahasia" inputmode="numeric">
+        </div>
+      </div>
+
+      <div id="login-karyawan-form" class="hidden">
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">Masukkan Token Karyawan</label>
+          <input type="text" class="form-input" id="login-karyawan-token" placeholder="cth: ABCDE" style="text-transform: uppercase;">
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="submitLogin()" style="width: 100%; margin-top: 10px;">Masuk Aplikasi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RECEIPT PREVIEW MODAL ===== -->
+<div class="modal-overlay hidden" id="receipt-modal-overlay">
+  <div class="modal" style="max-width: 400px;">
+    <div class="modal-header">
+      <h3 style="display: flex; align-items: center; gap: 8px;">🎉 Transaksi Berhasil!</h3>
+      <button class="modal-close" onclick="closeReceiptModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding: 16px; background: #1a1a24;">
+      <!-- Struk Thermal Preview -->
+      <div class="receipt-preview-container" id="receipt-preview-content">
+        <!-- Receipt content injected here dynamically -->
+      </div>
+    </div>
+    <div class="modal-footer" style="flex-direction: column; gap: 10px; padding: 16px;">
+      <div style="display: flex; width: 100%; gap: 8px;">
+        <button class="btn btn-primary" onclick="printReceiptFromModal('bluetooth')" style="flex: 1; padding: 12px 6px;">
+          🖨️ Cetak Bluetooth
+        </button>
+        <button class="btn btn-secondary" onclick="printReceiptFromModal('browser')" style="flex: 1; padding: 12px 6px;">
+          📄 Cetak Browser / PDF
+        </button>
+      </div>
+      <button class="btn btn-success" onclick="closeReceiptModal()" style="width: 100%;">
+        ✅ Transaksi Baru
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EXPENSE MODAL ===== -->
+<div class="modal-overlay hidden" id="expense-modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>💸 Catat Pengeluaran</h3>
+      <button class="btn-close" onclick="closeExpenseModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom: 16px; color: var(--text-secondary); font-size: 0.85rem;">Catat uang keluar, misalnya untuk beli bahan baku, plastik, atau biaya tak terduga.</p>
+      
+      <div class="form-group">
+        <label class="form-label">Keterangan Pengeluaran</label>
+        <input type="text" id="expense-desc" class="form-input" placeholder="Contoh: Beli es batu & sedotan" autocomplete="off">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Nominal (Rp)</label>
+        <div class="input-with-prefix">
+          <span class="input-prefix">Rp</span>
+          <input type="number" id="expense-amount" class="form-input" placeholder="0" inputmode="numeric" style="padding-left: 45px;">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeExpenseModal()">Batal</button>
+      <button class="btn btn-primary" onclick="saveExpense()">Simpan Pengeluaran</button>
+    </div>
+  </div>
+</div>
+
+<!-- JS_INJECT -->
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker registered', reg))
+        .catch(err => console.error('Service Worker registration failed', err));
+    });
+  }
+</script>
+</body>
+</html>
