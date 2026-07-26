@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Aplikasi Kasir Warung Sederhana - Kelola pesanan, hitung pemasukan, dan export laporan ke Excel">
-  <title>Kasir Warung - Aplikasi Kasir Sederhana</title>
+  <meta name="description" content="cashirqu - Aplikasi Kasir Modern untuk Warung & Toko Anda">
+  <title>cashirqu - Aplikasi Kasir Modern</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ff9800">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#3dbf8a">
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="favicon.png">
   <!-- CSS_INJECT -->
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -19,16 +20,149 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <!-- SheetJS for Excel export -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <!-- Midtrans Snap -->
+  <script src="https://app.midtrans.com/snap/snap.js" data-client-key="Mid-client-_NktUTsxrE6MxLOG"></script>
 </head>
 <body>
+
+<!-- ===== PRICING / SUBSCRIPTION SCREEN ===== -->
+<div class="pricing-overlay hidden" id="pricing-screen">
+  <div class="pricing-container">
+
+    <!-- Logo -->
+    <div style="display:flex; justify-content:center; margin-bottom:6px;">
+      <svg viewBox="0 0 270 65" xmlns="http://www.w3.org/2000/svg" style="width:160px; height:39px;">
+        <text x="135" y="58" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="800" font-size="56" letter-spacing="-2">
+          <tspan fill="#ffffff">cashir</tspan><tspan fill="#3dbf8a">qu</tspan>
+        </text>
+      </svg>
+    </div>
+    <h2 class="pricing-title">Pilih Paket Anda</h2>
+    <p class="pricing-subtitle">Semua metode pembayaran tersedia — GoPay, DANA, QRIS, Transfer Bank &amp; lebih</p>
+
+    <!-- Free Trial Banner -->
+    <div class="trial-banner" id="trial-banner">
+      <div class="trial-banner-content">
+        <span class="trial-icon">🎁</span>
+        <div>
+          <div class="trial-title">Coba GRATIS 7 Hari</div>
+          <div class="trial-desc">Tidak perlu kartu kredit. Batalkan kapan saja.</div>
+        </div>
+      </div>
+      <button class="btn-trial" id="btn-start-trial" onclick="startFreeTrial()">Mulai Gratis</button>
+    </div>
+
+    <!-- Pricing Cards -->
+    <div class="pricing-cards">
+
+      <!-- Bulanan -->
+      <div class="pricing-card">
+        <div class="plan-icon">📅</div>
+        <div class="plan-name">Bulanan</div>
+        <div class="plan-price">Rp 39.000<span class="plan-per">/bulan</span></div>
+        <ul class="plan-features">
+          <li>✅ Semua fitur kasir</li>
+          <li>✅ Laporan keuangan</li>
+          <li>✅ Multi karyawan</li>
+          <li>✅ Export Excel</li>
+        </ul>
+        <button class="btn-plan" onclick="createMidtransPayment('monthly')">Pilih Bulanan</button>
+      </div>
+
+      <!-- Tahunan (Featured) -->
+      <div class="pricing-card pricing-card--featured">
+        <div class="plan-badge">🔥 Paling Hemat</div>
+        <div class="plan-icon">📆</div>
+        <div class="plan-name">Tahunan</div>
+        <div class="plan-price">Rp 249.000<span class="plan-per">/tahun</span></div>
+        <div class="plan-savings">Hemat 47% vs bulanan</div>
+        <ul class="plan-features">
+          <li>✅ Semua fitur kasir</li>
+          <li>✅ Laporan keuangan</li>
+          <li>✅ Multi karyawan</li>
+          <li>✅ Export Excel</li>
+          <li>✅ Prioritas dukungan</li>
+        </ul>
+        <button class="btn-plan btn-plan--featured" onclick="createMidtransPayment('yearly')">Pilih Tahunan</button>
+      </div>
+
+      <!-- Seumur Hidup -->
+      <div class="pricing-card">
+        <div class="plan-icon">♾️</div>
+        <div class="plan-name">Seumur Hidup</div>
+        <div class="plan-price">Rp 599.000<span class="plan-per"> sekali bayar</span></div>
+        <div class="plan-savings">Bayar sekali, pakai selamanya</div>
+        <ul class="plan-features">
+          <li>✅ Semua fitur kasir</li>
+          <li>✅ Laporan keuangan</li>
+          <li>✅ Multi karyawan</li>
+          <li>✅ Export Excel</li>
+          <li>✅ Update selamanya</li>
+          <li>✅ Prioritas dukungan</li>
+        </ul>
+        <button class="btn-plan" onclick="createMidtransPayment('lifetime')">Pilih Seumur Hidup</button>
+      </div>
+
+    </div><!-- /pricing-cards -->
+
+    <div class="pricing-footer">
+      <p id="pricing-status-msg"></p>
+      <button class="btn-pricing-logout" onclick="pricingLogout()">← Ganti Akun Google</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== SPLASH SCREEN ===== -->
+<div id="splash-screen" style="
+  position: fixed; inset: 0; z-index: 99999;
+  background: var(--bg-primary, #0f0f1a);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 24px;
+">
+  <svg viewBox="0 0 270 65" xmlns="http://www.w3.org/2000/svg" style="width:240px; height:58px; animation: splashFadeIn 0.5s ease forwards;">
+    <text x="135" y="58" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-weight="800" font-size="56" letter-spacing="-2">
+      <tspan fill="#ffffff">cashir</tspan><tspan fill="#3dbf8a">qu</tspan>
+    </text>
+  </svg>
+  <div style="display:flex; gap: 8px; align-items: center;">
+    <div class="splash-dot" style="animation-delay: 0s;"></div>
+    <div class="splash-dot" style="animation-delay: 0.15s;"></div>
+    <div class="splash-dot" style="animation-delay: 0.3s;"></div>
+  </div>
+  <p style="color: #9a9ab0; font-size: 0.85rem; margin-top: -8px; font-family: Inter, sans-serif;">Menghubungkan...</p>
+</div>
+<style>
+  @keyframes splashFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .splash-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #3dbf8a; animation: splashBounce 0.8s infinite ease-in-out;
+  }
+  @keyframes splashBounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1.2); opacity: 1; }
+  }
+  #splash-screen.fade-out {
+    animation: splashOut 0.35s ease forwards;
+  }
+  @keyframes splashOut {
+    from { opacity: 1; }
+    to { opacity: 0; pointer-events: none; }
+  }
+</style>
 
 <!-- ===== WELCOME / LOGIN SCREEN ===== -->
 <div class="welcome-overlay" id="welcome-overlay">
 
   <!-- === SCREEN 1: PILIH LOGIN === -->
   <div class="auth-container" id="login-screen">
-    <div class="auth-logo">🏪</div>
-    <h1 class="auth-title">Kasir Warung</h1>
+    <div style="display:flex; justify-content:center; margin-bottom:16px;">
+      <svg viewBox="0 0 270 65" xmlns="http://www.w3.org/2000/svg" style="width:230px; height:55px;">
+        <text x="135" y="58" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-weight="800" font-size="56" letter-spacing="-2">
+          <tspan fill="#ffffff">cashir</tspan><tspan fill="#3dbf8a">qu</tspan>
+        </text>
+      </svg>
+    </div>
     <p class="auth-subtitle">Pilih cara masuk Anda</p>
 
     <!-- Kartu Bos -->
@@ -37,13 +171,29 @@
         <span class="auth-card-icon">💼</span>
         <div>
           <div class="auth-card-title">Saya Bos / Pemilik</div>
-          <div class="auth-card-desc">Login dengan akun Google Anda</div>
+          <div class="auth-card-desc" id="bos-card-desc">Login dengan akun Google Anda</div>
         </div>
       </div>
-      <button class="btn-google" id="btn-google-login" onclick="loginWithGoogle()">
-        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 010-3.04V5.41H1.83a8 8 0 000 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 001.83 5.4L4.5 7.49a4.77 4.77 0 014.48-3.3z"/></svg>
-        Masuk dengan Google
-      </button>
+      <!-- Web: Google Login -->
+      <div id="bos-web-login">
+        <button class="btn-google" id="btn-google-login" onclick="loginWithGoogle()">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 010-3.04V5.41H1.83a8 8 0 000 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 001.83 5.4L4.5 7.49a4.77 4.77 0 014.48-3.3z"/></svg>
+          Masuk dengan Google
+        </button>
+      </div>
+      <!-- APK: Kode Bos Login (hidden by default, shown via JS if Capacitor detected) -->
+      <div id="bos-apk-login" style="display:none;">
+        <div style="background:#1a2a1a; border:1px solid #3dbf8a44; border-radius:10px; padding:12px; margin-bottom:10px;">
+          <div style="font-size:0.8rem; color:#3dbf8a; font-weight:600; margin-bottom:4px;">📱 Login Bos via Aplikasi Android</div>
+          <div style="font-size:0.75rem; color:#a1a1aa; line-height:1.5;">
+            Lihat <b>Kode Bos</b> Anda di website Cashirqu (pojok kanan atas setelah login), lalu masukkan di sini.
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <input type="number" id="bos-code-input" class="form-input" placeholder="Kode Bos (6 digit)" maxlength="6" inputmode="numeric" style="flex:1; font-size:1.1rem; letter-spacing:4px; text-align:center;">
+          <button class="btn btn-primary" id="btn-bos-code-login" onclick="loginAsBosWithCode()" style="white-space:nowrap;">✅ Masuk</button>
+        </div>
+      </div>
     </div>
 
     <div class="auth-divider"><span>atau</span></div>
@@ -69,16 +219,37 @@
       </div>
     </div>
 
-    <p class="auth-footer">Kasir Warung · Mandiri &amp; Praktis</p>
+    <p class="auth-footer">cashirqu · Mandiri &amp; Praktis</p>
   </div>
 
   <!-- === SCREEN 2: BUAT WARUNG BARU (muncul setelah Google login pertama kali) === -->
   <div class="auth-container hidden" id="new-shop-screen">
-    <div class="auth-logo">🏪</div>
+    <div style="display:flex; justify-content:center; margin-bottom:12px;">
+      <svg viewBox="0 0 270 65" xmlns="http://www.w3.org/2000/svg" style="width:190px; height:46px;">
+        <text x="135" y="58" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-weight="800" font-size="56" letter-spacing="-2">
+          <tspan fill="#ffffff">cashir</tspan><tspan fill="#3dbf8a">qu</tspan>
+        </text>
+      </svg>
+    </div>
     <h1 class="auth-title">Selamat Datang!</h1>
     <p class="auth-subtitle">Satu langkah lagi — beri nama warung Anda</p>
 
     <div class="auth-card">
+      <!-- Upload Logo -->
+      <div class="form-group" style="text-align:center;">
+        <label class="form-label" style="display:block; margin-bottom:8px;">Logo Warung (Opsional)</label>
+        <div id="logo-upload-preview" onclick="document.getElementById('logo-file-input').click()" style="
+          width:90px; height:90px; border-radius:50%; border:2px dashed #3dbf8a;
+          display:flex; align-items:center; justify-content:center;
+          margin:0 auto 8px; cursor:pointer; overflow:hidden;
+          background:#1a1a24; transition:border-color 0.2s;
+        ">
+          <span id="logo-upload-icon" style="font-size:28px;">🏪</span>
+          <img id="logo-upload-img" src="" style="width:100%;height:100%;object-fit:cover;display:none;" alt="Logo">
+        </div>
+        <p style="font-size:0.75rem; color:#9a9ab0; margin:0;">Ketuk untuk pilih foto</p>
+        <input type="file" id="logo-file-input" accept="image/*" style="display:none" onchange="previewShopLogo(event)">
+      </div>
       <div class="form-group">
         <label class="form-label">Nama Warung / Toko</label>
         <input type="text" class="form-input" id="new-shop-name"
@@ -99,7 +270,14 @@
   <!-- ===== HEADER ===== -->
   <header class="app-header">
     <div class="app-logo">
-      <div class="logo-icon">🏪</div>
+      <div class="logo-icon" id="shop-logo-display" onclick="if(state.role==='Bos')triggerLogoUpload()" style="cursor:pointer; overflow:hidden; position:relative; background:transparent;">
+        <!-- Default: cashirqu logo PNG -->
+        <img id="shop-logo-default" src="cashirqu-logo.png" alt="cashirqu" style="width:100%;height:100%;object-fit:contain;border-radius:inherit;">
+        <!-- Custom shop logo (ditimpa ketika Bos upload logo sendiri) -->
+        <img id="shop-logo-img" src="" alt="Logo" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:none;position:absolute;top:0;left:0;">
+      </div>
+      <!-- Hidden file input untuk ganti logo dari header -->
+      <input type="file" id="header-logo-input" accept="image/*" style="display:none" onchange="changeShopLogo(event)">
       <div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <h1 id="shop-title-display">KASIR WARUNG</h1>
@@ -209,7 +387,19 @@
         <div class="sc-value" id="stat-income">Rp 0</div>
         <div class="sc-sub" id="stat-income-sub">Hari Ini</div>
       </div>
+      <div class="stat-card" style="border-left: 4px solid var(--danger, #ef4444);">
+        <div class="sc-icon">💸</div>
+        <div class="sc-label">Total Pengeluaran</div>
+        <div class="sc-value" id="stat-expense" style="color: var(--danger, #ef4444);">Rp 0</div>
+        <div class="sc-sub" id="stat-expense-sub">Hari Ini</div>
+      </div>
       <div class="stat-card success">
+        <div class="sc-icon">✨</div>
+        <div class="sc-label">Laba Bersih</div>
+        <div class="sc-value" id="stat-net-profit">Rp 0</div>
+        <div class="sc-sub" id="stat-net-profit-sub">Hari Ini</div>
+      </div>
+      <div class="stat-card success" style="border-left-color: #3dbf8a;">
         <div class="sc-icon">🧾</div>
         <div class="sc-label">Jumlah Transaksi</div>
         <div class="sc-value" id="stat-txn">0</div>
@@ -260,8 +450,10 @@
     <div class="section-card">
       <div class="section-header">
         <h2 class="section-title"><span class="icon">📋</span> Riwayat Transaksi</h2>
-        <div class="riwayat-controls">
+        <div class="riwayat-controls" style="display:flex; gap:8px; align-items:center;">
           <input type="date" class="date-input" id="history-date">
+          <button class="btn btn-primary" onclick="showClosingModal()" style="padding: 8px; font-size: 0.9rem;">💼 Rekap Shift</button>
+          <button class="btn btn-secondary" onclick="exportToExcel()" id="btn-export-excel" style="padding: 8px; font-size: 0.9rem;">⬇️ Excel</button>
         </div>
       </div>
       <div class="daily-summary" id="history-summary"></div>
@@ -317,6 +509,26 @@
     Bayar ➔
   </div>
 </div>
+
+<!-- ===== MOBILE BOTTOM NAVIGATION ===== -->
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+  <button class="mbn-tab active" data-page="kasir" onclick="switchPage('kasir')">
+    <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    <span>Kasir</span>
+  </button>
+  <button class="mbn-tab" data-page="keuangan" id="mbn-keuangan" onclick="switchPage('keuangan')">
+    <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span>Keuangan</span>
+  </button>
+  <button class="mbn-tab" data-page="riwayat" id="mbn-riwayat" onclick="switchPage('riwayat')">
+    <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    <span>Riwayat</span>
+  </button>
+  <button class="mbn-tab" data-page="menu" onclick="switchPage('menu')">
+    <svg class="mbn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+    <span>Kelola</span>
+  </button>
+</nav>
 
 <!-- ===== AUTHENTICATION OVERLAY ===== -->
 <div class="auth-overlay hidden" id="auth-overlay">
@@ -426,6 +638,21 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeExpenseModal()">Batal</button>
       <button class="btn btn-primary" onclick="saveExpense()">Simpan Pengeluaran</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bluetooth Device Picker Modal -->
+<div class="modal-overlay hidden" id="bt-picker-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Pilih Printer Bluetooth</h3>
+      <button class="btn-close" onclick="closeBtPicker()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="bt-device-list" style="display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto;">
+        <!-- Devices will be injected here -->
+      </div>
     </div>
   </div>
 </div>
