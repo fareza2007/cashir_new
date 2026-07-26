@@ -2550,6 +2550,9 @@ function init() {
           hideSplash();
           await checkAndShowSubscription();
         } else {
+          state.uid          = user.uid;
+          state.userEmail    = user.email;
+          state.userPhotoURL = user.photoURL;
           hideSplash();
           showNewShopForm(user.displayName);
         }
