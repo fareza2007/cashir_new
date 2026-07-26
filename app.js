@@ -370,13 +370,7 @@ async function loginWithGoogle() {
         state.shopLogo     = data.shopLogo || null;
       }
       
-      if (!data.bosCode) {
-        const newBosCode = generateBosCode();
-        state.bosCode = newBosCode;
-        db.collection('shops').doc(user.uid).update({ bosCode: newBosCode });
-      } else {
-        state.bosCode = data.bosCode;
-      }
+
 
       // Cek subscription sebelum masuk app
       await checkAndShowSubscription();
@@ -488,13 +482,10 @@ async function createNewShop() {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Menyimpan...'; }
   
   const employeeCode = generateEmployeeCode();
-  const bosCode      = generateBosCode();
-  
   state.role         = 'Bos';
   state.token        = state.uid;
   state.shopName     = shopName;
   state.employeeCode = employeeCode;
-  state.bosCode      = bosCode;
   
   // Simpan ke Firestore (termasuk logo jika ada)
   await db.collection('shops').doc(state.uid).set({
