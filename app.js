@@ -320,9 +320,30 @@ async function loginWithGoogle() {
   if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Menghubungkan...'; }
   
   try {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    const result = await auth.signInWithPopup(provider);
-    const user   = result.user;
+    let user = null;
+
+    // Di dalam APK (Capacitor), gunakan Native Google Sign-In
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+      const FirebaseAuthentication = window.Capacitor.Plugins && window.Capacitor.Plugins.FirebaseAuthentication;
+      if (!FirebaseAuthentication) {
+        throw new Error('Native Google Sign-In tidak tersedia.');
+      }
+      // Tampilkan native Google account picker dialog
+      const result = await FirebaseAuthentication.signInWithGoogle();
+      // Gunakan idToken untuk login ke Firebase Web SDK
+      const credential = firebase.auth.GoogleAuthProvider.credential(
+        result.credential && result.credential.idToken
+      );
+      const webResult = await auth.signInWithCredential(credential);
+      user = webResult.user;
+    } else {
+      // Di web browser biasa, gunakan popup
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const result = await auth.signInWithPopup(provider);
+      user = result.user;
+    }
+
+
     
     // Cek apakah warung sudah ada di Firestore
     const shopDoc = await db.collection('shops').doc(user.uid).get();
@@ -480,7 +501,6 @@ async function createNewShop() {
     shopName:      shopName,
     shopLogo:      state.shopLogo || null,
     employeeCode:  employeeCode,
-    bosCode:       bosCode,
     ownerEmail:    state.userEmail,
     menu:          [],
     transactions:  [],
@@ -495,44 +515,6 @@ async function createNewShop() {
   sendEmployeeCodeEmail(state.userEmail, shopName, employeeCode);
   
   enterApp();
-}
-
-function generateBosCode() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-async function loginAsBosWithCode() {
-  const code = document.getElementById('bos-code-input').value.trim();
-  if (!code) { alert('Masukkan Kode Akses Bos!'); return; }
-  
-  const btn = document.getElementById('btn-bos-code-login');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳...'; }
-  
-  try {
-    const snapshot = await db.collection('shops').where('bosCode', '==', code).limit(1).get();
-    if (!snapshot.empty) {
-      const shopDoc = snapshot.docs[0];
-      const data    = shopDoc.data();
-      
-      state.uid          = shopDoc.id;
-      state.role         = 'Bos';
-      state.token        = shopDoc.id;
-      state.shopName     = data.shopName;
-      state.employeeCode = data.employeeCode;
-      state.bosCode      = data.bosCode;
-      
-      localStorage.setItem('kasir_bosCode', code);
-      hidePricingScreen();
-      enterApp();
-    } else {
-      alert('Kode Bos tidak valid!');
-      if (btn) { btn.disabled = false; btn.textContent = 'Masuk'; }
-    }
-  } catch (err) {
-    console.error('Bos code login error:', err);
-    alert('Gagal login: ' + err.message);
-    if (btn) { btn.disabled = false; btn.textContent = 'Masuk'; }
-  }
 }
 
 // === AUTH: LOGIN KARYAWAN DENGAN KODE ===
@@ -2083,7 +2065,7 @@ function applyRoleRestrictions() {
     if (roleText) roleText.textContent = '💼 Bos';
     if (tokenText) {
       tokenText.style.display = 'inline-block';
-      tokenText.textContent = `Kode Kasir: ${state.employeeCode || '-'} | Kode Bos: ${state.bosCode || '-'} 🔑`;
+      tokenText.textContent = `Kode Kasir: ${state.employeeCode || '-'} 🔑`;
     }
   } else {
     if (navKeuangan) navKeuangan.style.display = 'none';
@@ -2557,26 +2539,11 @@ function init() {
   }
 
   const savedKaryawanCode = localStorage.getItem('kasir_karyawanCode');
-  const savedBosCode = localStorage.getItem('kasir_bosCode');
   
-  // === Deteksi APK vs Web ===
-  const isAPK = !!window.Capacitor;
-  const webLogin = document.getElementById('bos-web-login');
-  const apkLogin = document.getElementById('bos-apk-login');
-  const bosDesc  = document.getElementById('bos-card-desc');
-  if (isAPK) {
-    if (webLogin) webLogin.style.display = 'none';
-    if (apkLogin) apkLogin.style.display = 'block';
-    if (bosDesc)  bosDesc.textContent = 'Masuk dengan Kode Bos dari website';
-  } else {
-    if (webLogin) webLogin.style.display = 'block';
-    if (apkLogin) apkLogin.style.display = 'none';
-  }
-
   // Cek auto login
   auth.onAuthStateChanged(async (user) => {
-    if (user && !isAPK) {
-      // Auto login di Web via Google
+    if (user) {
+      // Auto login via Google
       try {
         const shopDoc = await db.collection('shops').doc(user.uid).get();
         if (shopDoc.exists) {
@@ -2589,7 +2556,6 @@ function init() {
           state.shopName     = data.shopName;
           state.employeeCode = data.employeeCode || '';
           state.shopLogo     = data.shopLogo || null;
-          state.bosCode      = data.bosCode || '';
           hideSplash();
           await checkAndShowSubscription();
         } else {
@@ -2601,9 +2567,6 @@ function init() {
         hideSplash();
         document.getElementById('welcome-overlay').classList.remove('hidden');
       }
-    } else if (savedBosCode) {
-      document.getElementById('bos-code-input').value = savedBosCode;
-      loginAsBosWithCode();
     } else if (savedKaryawanCode) {
       loginAsKaryawan(savedKaryawanCode);
     } else {
