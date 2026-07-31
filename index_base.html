@@ -63,7 +63,7 @@
         <ul class="plan-features">
           <li>✅ Semua fitur kasir</li>
           <li>✅ Laporan keuangan</li>
-          <li>✅ Multi karyawan</li>
+          <li>✅ Multi staff</li>
           <li>✅ Export Excel</li>
         </ul>
         <button class="btn-plan" onclick="createMidtransPayment('monthly')">Pilih Bulanan</button>
@@ -79,7 +79,7 @@
         <ul class="plan-features">
           <li>✅ Semua fitur kasir</li>
           <li>✅ Laporan keuangan</li>
-          <li>✅ Multi karyawan</li>
+          <li>✅ Multi staff</li>
           <li>✅ Export Excel</li>
           <li>✅ Prioritas dukungan</li>
         </ul>
@@ -95,7 +95,7 @@
         <ul class="plan-features">
           <li>✅ Semua fitur kasir</li>
           <li>✅ Laporan keuangan</li>
-          <li>✅ Multi karyawan</li>
+          <li>✅ Multi staff</li>
           <li>✅ Export Excel</li>
           <li>✅ Update selamanya</li>
           <li>✅ Prioritas dukungan</li>
@@ -165,17 +165,17 @@
     </div>
     <p class="auth-subtitle">Pilih cara masuk Anda</p>
 
-    <!-- Kartu Bos -->
+    <!-- Kartu Owner -->
     <div class="auth-card">
       <div class="auth-card-header">
         <span class="auth-card-icon">💼</span>
         <div>
-          <div class="auth-card-title">Saya Bos / Pemilik</div>
-          <div class="auth-card-desc" id="bos-card-desc">Login dengan akun Google Anda</div>
+          <div class="auth-card-title">Saya Owner / Pemilik</div>
+          <div class="auth-card-desc" id="owner-card-desc">Login dengan akun Google Anda</div>
         </div>
       </div>
       <!-- Web: Google Login -->
-      <div id="bos-web-login">
+      <div id="owner-web-login">
         <button class="btn-google" id="btn-google-login" onclick="loginWithGoogle()">
           <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 010-3.04V5.41H1.83a8 8 0 000 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 001.83 5.4L4.5 7.49a4.77 4.77 0 014.48-3.3z"/></svg>
           Masuk dengan Google
@@ -185,22 +185,22 @@
 
     <div class="auth-divider"><span>atau</span></div>
 
-    <!-- Kartu Karyawan -->
+    <!-- Kartu Staff -->
     <div class="auth-card">
       <div class="auth-card-header">
         <span class="auth-card-icon">🧑‍🍳</span>
         <div>
-          <div class="auth-card-title">Saya Karyawan</div>
-          <div class="auth-card-desc">Masukkan kode yang diberikan Bos</div>
+          <div class="auth-card-title">Saya Staff</div>
+          <div class="auth-card-desc">Masukkan kode yang diberikan Owner</div>
         </div>
       </div>
       <div class="auth-input-row">
-        <input type="number" id="karyawan-code-input" class="form-input auth-code-input"
+        <input type="number" id="staff-code-input" class="form-input auth-code-input"
           placeholder="Kode 8 angka"
           maxlength="8"
           oninput="if(this.value.length>8)this.value=this.value.slice(0,8)"
           style="letter-spacing: 3px; font-size: 1.2rem; font-weight: 700; text-align: center;">
-        <button class="btn btn-primary" id="btn-karyawan-login" onclick="loginAsKaryawan()" style="white-space:nowrap; padding: 12px 20px;">
+        <button class="btn btn-primary" id="btn-staff-login" onclick="loginAsKaryawan()" style="white-space:nowrap; padding: 12px 20px;">
           ✅ Masuk
         </button>
       </div>
@@ -242,7 +242,7 @@
         <input type="text" class="form-input" id="new-shop-name"
           placeholder="cth: Warung Jaya Makmur"
           style="font-size: 1.1rem; font-weight: 600;">
-        <p class="form-hint" style="margin-top: 6px;">Kode karyawan akan otomatis dibuat dan dikirim ke Gmail Anda.</p>
+        <p class="form-hint" style="margin-top: 6px;">Kode staff akan otomatis dibuat dan dikirim ke Gmail Anda.</p>
       </div>
       <button class="welcome-btn" id="btn-create-shop" onclick="createNewShop()" style="margin-top: 16px;">
         🚀 Buat Warung &amp; Dapatkan Kode
@@ -257,10 +257,10 @@
   <!-- ===== HEADER ===== -->
   <header class="app-header">
     <div class="app-logo">
-      <div class="logo-icon" id="shop-logo-display" onclick="if(state.role==='Bos')triggerLogoUpload()" style="cursor:pointer; overflow:hidden; position:relative; background:transparent;">
+      <div class="logo-icon" id="shop-logo-display" onclick="if(state.role==='Owner')triggerLogoUpload()" style="cursor:pointer; overflow:hidden; position:relative; background:transparent;">
         <!-- Default: cashirqu logo PNG -->
         <img id="shop-logo-default" src="cashirqu-logo.png" alt="cashirqu" style="width:100%;height:100%;object-fit:contain;border-radius:inherit;">
-        <!-- Custom shop logo (ditimpa ketika Bos upload logo sendiri) -->
+        <!-- Custom shop logo (ditimpa ketika Owner upload logo sendiri) -->
         <img id="shop-logo-img" src="" alt="Logo" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:none;position:absolute;top:0;left:0;">
       </div>
       <!-- Hidden file input untuk ganti logo dari header -->
@@ -297,8 +297,8 @@
       <!-- User Profile & Badge -->
       <div class="user-role-badge" id="header-user-badge">
         <img id="user-avatar" src="" alt="" style="display:none; width:28px; height:28px; border-radius:50%; border: 2px solid var(--accent-primary); object-fit:cover;">
-        <span class="badge-role" id="role-badge-text">💼 Bos</span>
-        <span class="badge-token-info" id="token-badge-text" title="Klik untuk salin kode karyawan" onclick="copyEmployeeToken()" style="cursor:pointer;">Kode: — 📋</span>
+        <span class="badge-role" id="role-badge-text">💼 Owner</span>
+        <span class="badge-token-info" id="token-badge-text" title="Klik untuk salin kode staff" onclick="copyEmployeeToken()" style="cursor:pointer;">Kode: — 📋</span>
       </div>
       
       <div class="header-buttons" style="display: flex; gap: 8px;">
@@ -536,8 +536,8 @@
         <input type="text" class="form-input" id="setup-warung-name" placeholder="cth: Warung Barokah">
       </div>
       <div class="form-group" style="text-align: left;">
-        <label class="form-label">Buat PIN Bos (Angka)</label>
-        <input type="password" class="form-input" id="setup-bos-pin" placeholder="cth: 123456" inputmode="numeric">
+        <label class="form-label">Buat PIN Owner (Angka)</label>
+        <input type="password" class="form-input" id="setup-owner-pin" placeholder="cth: 123456" inputmode="numeric">
       </div>
       <button class="btn btn-primary" onclick="submitSetup()" style="width: 100%; margin-top: 10px;">🚀 Buat Warung Sekarang</button>
     </div>
@@ -547,21 +547,21 @@
       <p style="margin-bottom: 20px; color: var(--text-secondary); font-size: 0.9rem;">Silakan pilih peran untuk masuk ke dalam aplikasi kasir.</p>
       
       <div style="display:flex; gap:10px; margin-bottom: 20px;">
-        <button class="btn btn-secondary" id="tab-login-bos" onclick="setLoginTab('bos')" style="flex:1; border-color:var(--accent-primary); color:var(--accent-primary);">👤 Bos</button>
-        <button class="btn btn-secondary" id="tab-login-karyawan" onclick="setLoginTab('karyawan')" style="flex:1;">👨‍💼 Karyawan</button>
+        <button class="btn btn-secondary" id="tab-login-owner" onclick="setLoginTab('owner')" style="flex:1; border-color:var(--accent-primary); color:var(--accent-primary);">👤 Owner</button>
+        <button class="btn btn-secondary" id="tab-login-staff" onclick="setLoginTab('staff')" style="flex:1;">👨‍💼 Staff</button>
       </div>
 
-      <div id="login-bos-form">
+      <div id="login-owner-form">
         <div class="form-group" style="text-align: left;">
-          <label class="form-label">Masukkan PIN Bos</label>
-          <input type="password" class="form-input" id="login-bos-pin" placeholder="Masukkan PIN rahasia" inputmode="numeric">
+          <label class="form-label">Masukkan PIN Owner</label>
+          <input type="password" class="form-input" id="login-owner-pin" placeholder="Masukkan PIN rahasia" inputmode="numeric">
         </div>
       </div>
 
-      <div id="login-karyawan-form" class="hidden">
+      <div id="login-staff-form" class="hidden">
         <div class="form-group" style="text-align: left;">
-          <label class="form-label">Masukkan Token Karyawan</label>
-          <input type="text" class="form-input" id="login-karyawan-token" placeholder="cth: ABCDE" style="text-transform: uppercase;">
+          <label class="form-label">Masukkan Token Staff</label>
+          <input type="text" class="form-input" id="login-staff-token" placeholder="cth: ABCDE" style="text-transform: uppercase;">
         </div>
       </div>
 

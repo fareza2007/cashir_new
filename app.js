@@ -359,7 +359,7 @@ async function loginWithGoogle() {
       state.uid          = user.uid;
       state.userEmail    = user.email;
       state.userPhotoURL = user.photoURL;
-      state.role         = 'Bos';
+      state.role         = 'Owner';
       state.token        = user.uid;
       state.shopName     = data.shopName;
       
@@ -443,7 +443,7 @@ async function previewShopLogo(event) {
   if (preview) preview.style.border = '2px solid #3dbf8a';
 }
 
-// Trigger upload logo dari header (hanya Bos)
+// Trigger upload logo dari header (hanya Owner)
 function triggerLogoUpload() {
   document.getElementById('header-logo-input').click();
 }
@@ -487,7 +487,7 @@ async function createNewShop() {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Menyimpan...'; }
   
   const employeeCode = generateEmployeeCode();
-  state.role         = 'Bos';
+  state.role         = 'Owner';
   state.token        = state.uid;
   state.shopName     = shopName;
   state.employeeCode = employeeCode;
@@ -507,7 +507,7 @@ async function createNewShop() {
     updatedAt:     firebase.firestore.FieldValue.serverTimestamp()
   });
   
-  // Kirim kode ke Gmail Bos
+  // Kirim kode ke Gmail Owner
   sendEmployeeCodeEmail(state.userEmail, shopName, employeeCode);
   
   enterApp();
@@ -516,10 +516,10 @@ async function createNewShop() {
 // === AUTH: LOGIN KARYAWAN DENGAN KODE ===
 async function loginAsKaryawan(autoCode = null) {
   // Jika dipanggil otomatis, lewati input DOM, jika tidak ambil dari input
-  const code = autoCode && typeof autoCode === 'string' ? autoCode : document.getElementById('karyawan-code-input').value.trim();
-  if (!code) { alert('Masukkan kode karyawan terlebih dahulu!'); return; }
+  const code = autoCode && typeof autoCode === 'string' ? autoCode : document.getElementById('staff-code-input').value.trim();
+  if (!code) { alert('Masukkan kode staff terlebih dahulu!'); return; }
   
-  const btn = document.getElementById('btn-karyawan-login');
+  const btn = document.getElementById('btn-staff-login');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Memeriksa...'; }
   
   try {
@@ -529,7 +529,7 @@ async function loginAsKaryawan(autoCode = null) {
       const shopDoc = snapshot.docs[0];
       const data    = shopDoc.data();
       
-      state.role         = 'Karyawan';
+      state.role         = 'Staff';
       state.token        = shopDoc.id;
       state.shopName     = data.shopName;
       state.employeeCode = data.employeeCode;
@@ -540,11 +540,11 @@ async function loginAsKaryawan(autoCode = null) {
       
       enterApp();
     } else {
-      alert('Kode tidak ditemukan! Minta kode yang benar dari Bos Anda.');
+      alert('Kode tidak ditemukan! Minta kode yang benar dari Owner Anda.');
       if (btn) { btn.disabled = false; btn.textContent = '✅ Masuk'; }
     }
   } catch (err) {
-    console.error('Karyawan login error:', err);
+    console.error('Staff login error:', err);
     alert('Gagal memeriksa kode. Periksa koneksi internet Anda.\nError: ' + err.message);
     if (btn) { btn.disabled = false; btn.textContent = '✅ Masuk'; }
   }
@@ -564,7 +564,7 @@ function enterApp() {
   const tokenBadge = document.getElementById('token-badge-text');
   const userAvatar = document.getElementById('user-avatar');
   
-  if (roleBadge)  roleBadge.textContent  = state.role === 'Bos' ? '💼 Bos' : '🧑‍🍳 Karyawan';
+  if (roleBadge)  roleBadge.textContent  = state.role === 'Owner' ? '💼 Owner' : '🧑‍🍳 Staff';
   if (tokenBadge) tokenBadge.textContent = 'Kode: ' + (state.employeeCode || '-');
   if (userAvatar && state.userPhotoURL) {
     userAvatar.src   = state.userPhotoURL;
@@ -583,8 +583,8 @@ function enterApp() {
 function copyEmployeeToken() {
   if (!state.employeeCode) return;
   navigator.clipboard.writeText(state.employeeCode)
-    .then(() => alert('Kode karyawan "' + state.employeeCode + '" berhasil disalin! Bagikan ke karyawan Anda.'))
-    .catch(() => alert('Kode karyawan Anda: ' + state.employeeCode));
+    .then(() => alert('Kode staff "' + state.employeeCode + '" berhasil disalin! Bagikan ke staff Anda.'))
+    .catch(() => alert('Kode staff Anda: ' + state.employeeCode));
 }
 
 // (applyRoleRestrictions moved to bottom)
@@ -600,8 +600,8 @@ function logout() {
 
 // --- Navigation ---
 function switchPage(page) {
-  if (state.role === 'Karyawan' && page === 'keuangan') {
-    alert('Akses Ditolak! Bagian Keuangan hanya dapat diakses oleh Bos.');
+  if (state.role === 'Staff' && page === 'keuangan') {
+    alert('Akses Ditolak! Bagian Keuangan hanya dapat diakses oleh Owner.');
     return;
   }
   state.activePage = page;
@@ -915,9 +915,9 @@ function showPaymentMethodStep() {
         <span class="sc-icon">💵</span>
         <span class="sc-title">Tunai</span>
       </div>
-      <div class="selection-card shopeepay" onclick="selectPayment('ShopeePay')">
+      <div class="selection-card non-tunai" onclick="selectPayment('Non Tunai')">
         <span class="sc-icon">📱</span>
-        <span class="sc-title">ShopeePay</span>
+        <span class="sc-title">Non Tunai</span>
       </div>
     </div>
   `;
@@ -1117,7 +1117,7 @@ function renderHistory() {
           </div>
           <div class="hi-items">${t.items.map(i => `${i.emoji || '🍽️'} ${i.name} x${i.qty}`).join(', ')}</div>
           <div class="flex justify-between items-center mt-12">
-            <span style="font-size:0.72rem;padding:2px 6px;background:var(--bg-card);border-radius:4px;color:${t.paymentMethod === 'ShopeePay' ? '#ee4d2d' : 'var(--success)'}">${t.paymentMethod === 'ShopeePay' ? '📱 ShopeePay' : '💵 Tunai'}</span>
+            <span style="font-size:0.72rem;padding:2px 6px;background:var(--bg-card);border-radius:4px;color:${t.paymentMethod === 'Non Tunai' ? '#ee4d2d' : 'var(--success)'}">${t.paymentMethod === 'Non Tunai' ? '📱 Non Tunai' : '💵 Tunai'}</span>
             <span class="hi-total">${formatRupiah(t.total)}</span>
           </div>
         </div>`;
@@ -1174,7 +1174,7 @@ function showTxnDetail(txnId) {
       `).join('')}
     </div>
     <div class="txn-detail-total" style="border-top:none;padding-top:8px;margin-top:0;">
-      <span style="font-size:0.8rem;color:var(--text-muted);font-weight:500;">Metode Bayar: ${txn.paymentMethod === 'ShopeePay' ? '<span style="color:#ee4d2d">ShopeePay</span>' : '<span style="color:var(--success)">Tunai</span>'}</span>
+      <span style="font-size:0.8rem;color:var(--text-muted);font-weight:500;">Metode Bayar: ${txn.paymentMethod === 'Non Tunai' ? '<span style="color:#ee4d2d">Non Tunai</span>' : '<span style="color:var(--success)">Tunai</span>'}</span>
     </div>
     ${txn.paymentMethod === 'Tunai' ? `
     <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--text-muted);margin-top:4px;">
@@ -1915,21 +1915,21 @@ function exportToExcel() {
 
 // --- Setup & Role Management Functions ---
 
-let selectedRole = 'Bos';
+let selectedRole = 'Owner';
 
 function selectSetupRole(role) {
   selectedRole = role;
-  document.getElementById('role-bos').classList.toggle('active', role === 'Bos');
-  document.getElementById('role-karyawan').classList.toggle('active', role === 'Karyawan');
+  document.getElementById('role-owner').classList.toggle('active', role === 'Owner');
+  document.getElementById('role-staff').classList.toggle('active', role === 'Staff');
   
-  if (role === 'Bos') {
+  if (role === 'Owner') {
     document.getElementById('setup-shop-name-group').style.display = 'block';
-    document.getElementById('setup-token-bos-group').style.display = 'block';
-    document.getElementById('setup-token-karyawan-group').style.display = 'none';
+    document.getElementById('setup-token-owner-group').style.display = 'block';
+    document.getElementById('setup-token-staff-group').style.display = 'none';
   } else {
     document.getElementById('setup-shop-name-group').style.display = 'none';
-    document.getElementById('setup-token-bos-group').style.display = 'none';
-    document.getElementById('setup-token-karyawan-group').style.display = 'block';
+    document.getElementById('setup-token-owner-group').style.display = 'none';
+    document.getElementById('setup-token-staff-group').style.display = 'block';
   }
 }
 
@@ -1939,28 +1939,28 @@ function generateRandomToken() {
   for (let i = 0; i < 6; i++) {
     randToken += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  document.getElementById('setup-token-bos').value = randToken;
+  document.getElementById('setup-token-owner').value = randToken;
 }
 
 async function saveSetup() {
   const shopNameInput = document.getElementById('setup-shop-name').value.trim();
   
-  if (selectedRole === 'Bos') {
+  if (selectedRole === 'Owner') {
     if (!shopNameInput) {
       alert('Nama Warung / Toko tidak boleh kosong!');
       return;
     }
-    const tokenInput = document.getElementById('setup-token-bos').value.trim();
+    const tokenInput = document.getElementById('setup-token-owner').value.trim();
     if (!tokenInput) {
-      alert('Token Karyawan tidak boleh kosong!');
+      alert('Token Staff tidak boleh kosong!');
       return;
     }
     state.shopName = shopNameInput;
-    state.role = 'Bos';
+    state.role = 'Owner';
     state.token = tokenInput;
     
     try {
-      // Cek apakah token sudah ada (Bos sedang login ulang)
+      // Cek apakah token sudah ada (Owner sedang login ulang)
       const doc = await db.collection('shops').doc(tokenInput).get();
       if (doc.exists) {
         const data = doc.data();
@@ -1970,7 +1970,7 @@ async function saveSetup() {
         syncFromFirebase();
         finishSetup();
       } else {
-        // Bos membuat warung baru
+        // Owner membuat warung baru
         state.shopName = shopNameInput;
         state.isSetup = true;
         saveData(); // Save locally and create in Firebase
@@ -1978,13 +1978,13 @@ async function saveSetup() {
         finishSetup();
       }
     } catch (error) {
-      console.error("Error checking token for Bos:", error);
+      console.error("Error checking token for Owner:", error);
       alert('Gagal menghubungi server. Error: ' + error.message);
     }
   } else {
-    const enteredToken = document.getElementById('setup-token-karyawan').value.trim();
+    const enteredToken = document.getElementById('setup-token-staff').value.trim();
     if (!enteredToken) {
-      alert('Harap masukkan Kode Karyawan!');
+      alert('Harap masukkan Kode Staff!');
       return;
     }
     
@@ -1994,7 +1994,7 @@ async function saveSetup() {
       if (doc.exists) {
         const data = doc.data();
         state.shopName = data.shopName;
-        state.role = 'Karyawan';
+        state.role = 'Staff';
         state.token = enteredToken;
         state.isSetup = true;
         
@@ -2002,11 +2002,11 @@ async function saveSetup() {
         syncFromFirebase(); // Start real-time sync
         finishSetup();
       } else {
-        alert('Kode Karyawan tidak ditemukan! Pastikan Bos sudah mengatur warung dan internet terhubung.');
+        alert('Kode Staff tidak ditemukan! Pastikan Owner sudah mengatur warung dan internet terhubung.');
       }
     } catch (error) {
       console.error("Error checking token:", error);
-      alert('Gagal mengecek kode karyawan. Error: ' + error.message);
+      alert('Gagal mengecek kode staff. Error: ' + error.message);
     }
   }
 }
@@ -2016,13 +2016,13 @@ function finishSetup() {
   document.getElementById('app-container').classList.remove('hidden');
   document.getElementById('shop-title-display').textContent = state.shopName;
   
-  if (state.role === 'Karyawan') {
+  if (state.role === 'Staff') {
     switchPage('kasir');
   }
   
   applyRoleRestrictions();
   
-  alert('Setup berhasil! Peran Anda: ' + (state.role === 'Bos' ? '💼 Bos (Pemilik)' : '🧑‍🍳 Karyawan'));
+  alert('Setup berhasil! Peran Anda: ' + (state.role === 'Owner' ? '💼 Owner (Pemilik)' : '🧑‍🍳 Staff'));
 }
 
 function resetSetup() {
@@ -2030,16 +2030,16 @@ function resetSetup() {
     // Hanya reset peran, BUKAN data menu/transaksi
     state.isSetup = false;
     localStorage.setItem('kasir_isSetup', 'false');
-    // Jangan hapus kasir_role agar token bos tetap tersimpan
+    // Jangan hapus kasir_role agar token owner tetap tersimpan
     
     document.getElementById('welcome-overlay').classList.remove('hidden');
     document.getElementById('app-container').classList.add('hidden');
     
     // Pre-fill dengan data yang sudah ada
     document.getElementById('setup-shop-name').value = state.shopName;
-    selectSetupRole('Bos');
-    document.getElementById('setup-token-bos').value = state.token;
-    document.getElementById('setup-token-karyawan').value = '';
+    selectSetupRole('Owner');
+    document.getElementById('setup-token-owner').value = state.token;
+    document.getElementById('setup-token-staff').value = '';
   }
 }
 
@@ -2052,13 +2052,13 @@ function applyRoleRestrictions() {
   const roleText = document.getElementById('role-badge-text');
   const tokenText = document.getElementById('token-badge-text');
   
-  if (state.role === 'Bos') {
+  if (state.role === 'Owner') {
     if (navKeuangan) navKeuangan.style.display = 'flex';
     if (mbnKeuangan) mbnKeuangan.style.display = 'flex';
     if (editShopBtn) editShopBtn.style.display = 'inline-flex';
     
     if (userBadge) userBadge.style.display = 'flex';
-    if (roleText) roleText.textContent = '💼 Bos';
+    if (roleText) roleText.textContent = '💼 Owner';
     if (tokenText) {
       tokenText.style.display = 'inline-block';
       tokenText.textContent = `Kode Kasir: ${state.employeeCode || '-'} 🔑`;
@@ -2073,13 +2073,13 @@ function applyRoleRestrictions() {
     }
     
     if (userBadge) userBadge.style.display = 'flex';
-    if (roleText) roleText.textContent = '🧑‍🍳 Karyawan';
+    if (roleText) roleText.textContent = '🧑‍🍳 Staff';
     if (tokenText) tokenText.style.display = 'none';
   }
 }
 
 function editShopName() {
-  if (state.role !== 'Bos') return;
+  if (state.role !== 'Owner') return;
   const newName = prompt('Masukkan nama warung baru:', state.shopName);
   if (newName !== null) {
     const trimmed = newName.trim();
@@ -2293,7 +2293,7 @@ function formatReceiptESC(txn) {
   addCommand(leftAlign);
   addText(`No: #${txn.id}\n`);
   addText(`Tgl: ${formatDate(txn.date)} ${formatTime(txn.date)}\n`);
-  addText(`Kasir: ${state.role === 'Bos' ? 'Bos' : 'Karyawan'}\n`);
+  addText(`Kasir: ${state.role === 'Owner' ? 'Owner' : 'Staff'}\n`);
   addText(`Tipe: ${txn.orderType || 'Makan Disini'}\n`);
   addText("--------------------------------\n");
   
@@ -2390,7 +2390,7 @@ function generateReceiptHTML(txn) {
     
     <div>No Transaksi: #${txn.id}</div>
     <div>Tanggal: ${formatDate(txn.date)} ${formatTime(txn.date)}</div>
-    <div>Kasir: ${state.role === 'Bos' ? 'Bos' : 'Karyawan'}</div>
+    <div>Kasir: ${state.role === 'Owner' ? 'Owner' : 'Staff'}</div>
     <div>Tipe: ${txn.orderType || 'Makan Disini'}</div>
     
     <div class="receipt-preview-divider"></div>
@@ -2562,7 +2562,7 @@ function init() {
           state.uid          = user.uid;
           state.userEmail    = user.email;
           state.userPhotoURL = user.photoURL;
-          state.role         = 'Bos';
+          state.role         = 'Owner';
           state.token        = user.uid;
           state.shopName     = data.shopName;
           state.employeeCode = data.employeeCode || '';
@@ -2590,8 +2590,8 @@ function init() {
   });
 
   if (window.capacitor) {
-    const webLogin = document.getElementById('bos-web-login');
-    const apkLogin = document.getElementById('bos-apk-login');
+    const webLogin = document.getElementById('owner-web-login');
+    const apkLogin = document.getElementById('owner-apk-login');
     if (webLogin) webLogin.style.display = 'none';
     if (apkLogin) apkLogin.style.display = 'block';
   }
@@ -2616,7 +2616,7 @@ function init() {
     if (e.key === 'Escape') closeModal();
   });
   
-  document.getElementById('karyawan-code-input')?.addEventListener('keydown', (e) => {
+  document.getElementById('staff-code-input')?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') loginAsKaryawan();
   });
 }
