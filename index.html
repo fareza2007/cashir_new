@@ -2,13 +2,12 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="description" content="cashirqu - Aplikasi Kasir Modern untuk Warung & Toko Anda">
   <title>cashirqu - Aplikasi Kasir Modern</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#3dbf8a">
   <link rel="icon" href="favicon.png" type="image/png">
-  <link rel="apple-touch-icon" href="favicon.png">
   <style>
 /* ============================================
    CASHIRQU - Design System
@@ -2405,6 +2404,10 @@ body::before {
 .btn-pricing-logout:hover{color:var(--text-secondary);}
 
 </style>
+  
+  <!-- Midtrans Snap -->
+  <script type="text/javascript" src="https://app.midtrans.com/snap/snap.js" data-client-key="Mid-client-_NktUTsxrE6MxLOG"></script>
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -2415,8 +2418,6 @@ body::before {
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <!-- SheetJS for Excel export -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-  <!-- Midtrans Snap -->
-  <script src="https://app.midtrans.com/snap/snap.js" data-client-key="Mid-client-_NktUTsxrE6MxLOG"></script>
 </head>
 <body>
 
@@ -2720,6 +2721,9 @@ body::before {
           <h2 class="section-title"><span class="icon">🍽️</span> Daftar Menu</h2>
           <button class="btn btn-secondary" onclick="showExpenseModal()" style="padding: 8px 12px; font-size: 0.85rem; border-color: var(--accent-primary); color: var(--accent-primary);">💸 Catat Pengeluaran</button>
         </div>
+        <div class="search-bar-container" style="margin-bottom: 12px;">
+          <input type="text" id="menu-search-input" class="form-input" placeholder="🔍 Cari nama menu..." oninput="renderMenuGrid()" style="width: 100%; padding: 10px 14px; border-radius: 8px;">
+        </div>
         <div class="category-filters" id="category-filters"></div>
         <div class="menu-grid" id="menu-grid"></div>
       </div>
@@ -2800,6 +2804,7 @@ body::before {
         <div class="sc-sub" id="stat-items-sub">item terjual</div>
       </div>
     </div>
+
 
     <!-- Charts -->
     <div class="chart-grid">
@@ -3276,7 +3281,7 @@ async function createMidtransPayment(plan) {
   const planBtns = document.querySelectorAll('.btn-plan, .btn-trial');
   planBtns.forEach(b => b.disabled = true);
   const statusMsg = document.getElementById('pricing-status-msg');
-  if (statusMsg) statusMsg.textContent = '⏳ Menyiapkan pembayaran...';
+  if (statusMsg) statusMsg.textContent = '⏳ Menyiapkan pembayaran Midtrans...';
 
   const orderId = `cashirqu-${plan}-${state.uid.slice(0,8)}-${Date.now()}`;
 
@@ -3287,27 +3292,32 @@ async function createMidtransPayment(plan) {
       body: JSON.stringify({ email: state.userEmail, plan, orderId, uid: state.uid }),
     });
     const data = await resp.json();
-    if (!data.snapToken) throw new Error(data.error || 'Gagal membuat transaksi');
+    
+    if (data.error) throw new Error(data.error);
+    if (!data.token) throw new Error('Gagal mendapatkan token transaksi dari Midtrans');
 
-    if (statusMsg) statusMsg.textContent = '';
-    planBtns.forEach(b => b.disabled = false);
+    if (statusMsg) statusMsg.textContent = 'Membuka popup pembayaran...';
 
-    // Buka popup Midtrans Snap
-    window.snap.pay(data.snapToken, {
-      onSuccess: async (result) => {
-        if (statusMsg) statusMsg.textContent = '✅ Pembayaran berhasil! Mengaktifkan akun...';
-        await activateSubscription(plan, orderId);
+    // Buka popup Midtrans
+    window.snap.pay(data.token, {
+      onSuccess: function(result) {
+        if (statusMsg) statusMsg.textContent = '✅ Pembayaran berhasil!';
+        activateSubscription(plan, orderId);
       },
-      onPending: (result) => {
-        if (statusMsg) statusMsg.textContent = '⏳ Pembayaran pending. Selesaikan pembayaran Anda.';
+      onPending: function(result) {
+        if (statusMsg) statusMsg.textContent = '⏳ Pembayaran tertunda/menunggu.';
+        planBtns.forEach(b => b.disabled = false);
       },
-      onError: (result) => {
-        if (statusMsg) statusMsg.textContent = '❌ Pembayaran gagal. Coba lagi.';
+      onError: function(result) {
+        if (statusMsg) statusMsg.textContent = '❌ Pembayaran gagal.';
+        planBtns.forEach(b => b.disabled = false);
       },
-      onClose: () => {
+      onClose: function() {
         if (statusMsg) statusMsg.textContent = 'Pembayaran dibatalkan.';
-      },
+        planBtns.forEach(b => b.disabled = false);
+      }
     });
+
   } catch (err) {
     console.error('Payment error:', err);
     if (statusMsg) statusMsg.textContent = '❌ ' + (err.message || 'Terjadi kesalahan');
@@ -3667,9 +3677,16 @@ function switchPage(page) {
 // --- Menu Rendering ---
 function renderMenuGrid() {
   const grid = document.getElementById('menu-grid');
-  const filtered = state.activeCategory === 'Semua'
+  const searchInput = document.getElementById('menu-search-input');
+  const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
+
+  let filtered = state.activeCategory === 'Semua'
     ? state.menu
     : state.menu.filter(m => m.category === state.activeCategory);
+    
+  if (searchQuery) {
+    filtered = filtered.filter(m => m.name.toLowerCase().includes(searchQuery));
+  }
 
   if (state.menu.length === 0) {
     grid.innerHTML = `
@@ -5609,8 +5626,24 @@ function init() {
           state.shopName     = data.shopName;
           state.employeeCode = data.employeeCode || '';
           state.shopLogo     = data.shopLogo || null;
-          hideSplash();
-          await checkAndShowSubscription();
+          
+          // Cek verifikasi Tripay dari URL Redirect
+          const urlParams = new URLSearchParams(window.location.search);
+          const tripayOrder = urlParams.get('order_id');
+          const tripayPlan = urlParams.get('plan');
+          if (tripayOrder && tripayPlan) {
+            // Hapus query params dari URL agar bersih
+            window.history.replaceState({}, document.title, "/");
+            const statusMsg = document.getElementById('pricing-status-msg');
+            if (statusMsg) {
+              statusMsg.textContent = '⏳ Memeriksa status pembayaran dari Tripay...';
+              document.getElementById('pricing-screen').classList.remove('hidden');
+            }
+            await activateSubscription(tripayPlan, tripayOrder);
+          } else {
+            hideSplash();
+            await checkAndShowSubscription();
+          }
         } else {
           state.uid          = user.uid;
           state.userEmail    = user.email;

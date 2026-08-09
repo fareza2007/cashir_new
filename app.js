@@ -234,7 +234,7 @@ async function createMidtransPayment(plan) {
   const planBtns = document.querySelectorAll('.btn-plan, .btn-trial');
   planBtns.forEach(b => b.disabled = true);
   const statusMsg = document.getElementById('pricing-status-msg');
-  if (statusMsg) statusMsg.textContent = '⏳ Menyiapkan pembayaran...';
+  if (statusMsg) statusMsg.textContent = '⏳ Menyiapkan pembayaran Midtrans...';
 
   const orderId = `cashirqu-${plan}-${state.uid.slice(0,8)}-${Date.now()}`;
 
@@ -245,27 +245,32 @@ async function createMidtransPayment(plan) {
       body: JSON.stringify({ email: state.userEmail, plan, orderId, uid: state.uid }),
     });
     const data = await resp.json();
-    if (!data.snapToken) throw new Error(data.error || 'Gagal membuat transaksi');
+    
+    if (data.error) throw new Error(data.error);
+    if (!data.token) throw new Error('Gagal mendapatkan token transaksi dari Midtrans');
 
-    if (statusMsg) statusMsg.textContent = '';
-    planBtns.forEach(b => b.disabled = false);
+    if (statusMsg) statusMsg.textContent = 'Membuka popup pembayaran...';
 
-    // Buka popup Midtrans Snap
-    window.snap.pay(data.snapToken, {
-      onSuccess: async (result) => {
-        if (statusMsg) statusMsg.textContent = '✅ Pembayaran berhasil! Mengaktifkan akun...';
-        await activateSubscription(plan, orderId);
+    // Buka popup Midtrans
+    window.snap.pay(data.token, {
+      onSuccess: function(result) {
+        if (statusMsg) statusMsg.textContent = '✅ Pembayaran berhasil!';
+        activateSubscription(plan, orderId);
       },
-      onPending: (result) => {
-        if (statusMsg) statusMsg.textContent = '⏳ Pembayaran pending. Selesaikan pembayaran Anda.';
+      onPending: function(result) {
+        if (statusMsg) statusMsg.textContent = '⏳ Pembayaran tertunda/menunggu.';
+        planBtns.forEach(b => b.disabled = false);
       },
-      onError: (result) => {
-        if (statusMsg) statusMsg.textContent = '❌ Pembayaran gagal. Coba lagi.';
+      onError: function(result) {
+        if (statusMsg) statusMsg.textContent = '❌ Pembayaran gagal.';
+        planBtns.forEach(b => b.disabled = false);
       },
-      onClose: () => {
+      onClose: function() {
         if (statusMsg) statusMsg.textContent = 'Pembayaran dibatalkan.';
-      },
+        planBtns.forEach(b => b.disabled = false);
+      }
     });
+
   } catch (err) {
     console.error('Payment error:', err);
     if (statusMsg) statusMsg.textContent = '❌ ' + (err.message || 'Terjadi kesalahan');
@@ -625,9 +630,16 @@ function switchPage(page) {
 // --- Menu Rendering ---
 function renderMenuGrid() {
   const grid = document.getElementById('menu-grid');
-  const filtered = state.activeCategory === 'Semua'
+  const searchInput = document.getElementById('menu-search-input');
+  const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
+
+  let filtered = state.activeCategory === 'Semua'
     ? state.menu
     : state.menu.filter(m => m.category === state.activeCategory);
+    
+  if (searchQuery) {
+    filtered = filtered.filter(m => m.name.toLowerCase().includes(searchQuery));
+  }
 
   if (state.menu.length === 0) {
     grid.innerHTML = `
@@ -2567,8 +2579,24 @@ function init() {
           state.shopName     = data.shopName;
           state.employeeCode = data.employeeCode || '';
           state.shopLogo     = data.shopLogo || null;
-          hideSplash();
-          await checkAndShowSubscription();
+          
+          // Cek verifikasi Tripay dari URL Redirect
+          const urlParams = new URLSearchParams(window.location.search);
+          const tripayOrder = urlParams.get('order_id');
+          const tripayPlan = urlParams.get('plan');
+          if (tripayOrder && tripayPlan) {
+            // Hapus query params dari URL agar bersih
+            window.history.replaceState({}, document.title, "/");
+            const statusMsg = document.getElementById('pricing-status-msg');
+            if (statusMsg) {
+              statusMsg.textContent = '⏳ Memeriksa status pembayaran dari Tripay...';
+              document.getElementById('pricing-screen').classList.remove('hidden');
+            }
+            await activateSubscription(tripayPlan, tripayOrder);
+          } else {
+            hideSplash();
+            await checkAndShowSubscription();
+          }
         } else {
           state.uid          = user.uid;
           state.userEmail    = user.email;

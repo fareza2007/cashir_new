@@ -2,14 +2,17 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="description" content="cashirqu - Aplikasi Kasir Modern untuk Warung & Toko Anda">
   <title>cashirqu - Aplikasi Kasir Modern</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#3dbf8a">
   <link rel="icon" href="favicon.png" type="image/png">
-  <link rel="apple-touch-icon" href="favicon.png">
   <!-- CSS_INJECT -->
+  
+  <!-- Midtrans Snap -->
+  <script type="text/javascript" src="https://app.midtrans.com/snap/snap.js" data-client-key="Mid-client-_NktUTsxrE6MxLOG"></script>
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -20,8 +23,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <!-- SheetJS for Excel export -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-  <!-- Midtrans Snap -->
-  <script src="https://app.midtrans.com/snap/snap.js" data-client-key="Mid-client-_NktUTsxrE6MxLOG"></script>
 </head>
 <body>
 
@@ -325,6 +326,9 @@
           <h2 class="section-title"><span class="icon">🍽️</span> Daftar Menu</h2>
           <button class="btn btn-secondary" onclick="showExpenseModal()" style="padding: 8px 12px; font-size: 0.85rem; border-color: var(--accent-primary); color: var(--accent-primary);">💸 Catat Pengeluaran</button>
         </div>
+        <div class="search-bar-container" style="margin-bottom: 12px;">
+          <input type="text" id="menu-search-input" class="form-input" placeholder="🔍 Cari nama menu..." oninput="renderMenuGrid()" style="width: 100%; padding: 10px 14px; border-radius: 8px;">
+        </div>
         <div class="category-filters" id="category-filters"></div>
         <div class="menu-grid" id="menu-grid"></div>
       </div>
@@ -405,6 +409,7 @@
         <div class="sc-sub" id="stat-items-sub">item terjual</div>
       </div>
     </div>
+
 
     <!-- Charts -->
     <div class="chart-grid">
