@@ -385,13 +385,13 @@ async function loginWithGoogle() {
       // Cek subscription sebelum masuk app
       await checkAndShowSubscription();
     } else {
-      // === PERTAMA KALI: Tampilkan form nama warung ===
+      // === PERTAMA KALI: Cek pricing dulu sebelum buat warung ===
       state.uid          = user.uid;
       state.userEmail    = user.email;
       state.userPhotoURL = user.photoURL;
-      // Cek subscription meski belum buat warung (bisa trial dulu)
-      // Setelah buat warung baru, akan enterApp() langsung
-      showNewShopForm(user.displayName);
+      state.role         = 'Owner';
+      state._pendingShopName = user.displayName;
+      await checkAndShowSubscription();
     }
   } catch (err) {
     console.error('Google Sign-In error:', err);
