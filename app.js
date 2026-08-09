@@ -557,6 +557,11 @@ async function loginAsKaryawan(autoCode = null) {
 
 // === MASUK KE APLIKASI ===
 function enterApp() {
+  // Jika user baru (sudah bayar tapi belum buat warung), tampilkan form buat warung
+  if (!state.shopName) {
+    showNewShopForm(state._pendingShopName || '');
+    return;
+  }
   document.getElementById('welcome-overlay').classList.add('hidden');
   document.getElementById('app-container').classList.remove('hidden');
   
@@ -2601,8 +2606,10 @@ function init() {
           state.uid          = user.uid;
           state.userEmail    = user.email;
           state.userPhotoURL = user.photoURL;
+          state.role         = 'Owner';
+          state._pendingShopName = user.displayName;
           hideSplash();
-          showNewShopForm(user.displayName);
+          await checkAndShowSubscription();
         }
       } catch (err) {
         console.error('Auto login error:', err);
