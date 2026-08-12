@@ -403,6 +403,8 @@ async function loginWithGoogle() {
 }
 
 function showNewShopForm(displayName) {
+  document.getElementById('pricing-screen').classList.add('hidden');
+  document.getElementById('welcome-overlay').classList.remove('hidden');
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('new-shop-screen').classList.remove('hidden');
   const nameInput = document.getElementById('new-shop-name');
