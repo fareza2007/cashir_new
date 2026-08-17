@@ -604,36 +604,23 @@ body {
 /* --- Dashboard --- */
 .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
 .stat-card {
-  background: var(--bg-2);
+  background: var(--bg-3);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   padding: 18px;
   position: relative; overflow: hidden;
 }
-.stat-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-}
-.stat-card.accent::before { background: var(--green); }
-.stat-card.success::before { background: var(--green); }
-.stat-card.info::before { background: #60a5fa; }
-.stat-card.purple::before { background: #a78bfa; }
+.stat-card::before { display: none; }
 
 .stat-card .sc-icon {
-  width: 36px; height: 36px;
-  border-radius: var(--r-sm);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.1rem; margin-bottom: 12px;
-  background: var(--bg-4);
+  display: none;
 }
-.stat-card .sc-label { font-size: 0.7rem; color: var(--text-3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-.stat-card .sc-value { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
-.stat-card.accent .sc-value, .stat-card.success .sc-value { color: var(--green); }
-.stat-card.info .sc-value { color: #60a5fa; }
-.stat-card.purple .sc-value { color: #a78bfa; }
-.stat-card .sc-sub { font-size: 0.7rem; color: var(--text-3); margin-top: 4px; }
+.stat-card .sc-label { font-size: 0.7rem; color: var(--text-3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.stat-card .sc-value { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px; color: var(--white); }
+.stat-card .sc-sub { font-size: 0.7rem; color: var(--text-3); margin-top: 6px; }
 
 .chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
-.chart-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 18px; }
+.chart-card { background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 18px; }
 .chart-card .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .chart-card .chart-title { font-size: 0.88rem; font-weight: 700; color: var(--white); }
 .chart-card canvas { width: 100% !important; max-height: 280px; }

@@ -1,6 +1,6 @@
 // Service Worker Cashirqu
 // Versi dinaikkan setiap ada update agar cache lama otomatis terhapus
-const CACHE_VERSION = 'cashirqu-v6';
+const CACHE_VERSION = 'cashirqu-v8';
 
 // Hanya file statis lokal yang di-cache
 const ASSETS_TO_CACHE = [

@@ -1581,7 +1581,7 @@ function renderMenuManage() {
   }
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="history-empty">🔍 Menu tidak ditemukan</div>`;
+    container.innerHTML = `<div class="history-empty">Menu tidak ditemukan</div>`;
     return;
   }
 
@@ -2075,10 +2075,10 @@ function applyRoleRestrictions() {
     if (editShopBtn) editShopBtn.style.display = 'inline-flex';
     
     if (userBadge) userBadge.style.display = 'flex';
-    if (roleText) roleText.textContent = '💼 Owner';
+    if (roleText) roleText.textContent = 'Owner';
     if (tokenText) {
       tokenText.style.display = 'inline-block';
-      tokenText.textContent = `Kode Kasir: ${state.employeeCode || '-'} 🔑`;
+      tokenText.textContent = `Kode Kasir: ${state.employeeCode || '-'}`;
     }
   } else {
     if (navKeuangan) navKeuangan.style.display = 'none';
@@ -2090,7 +2090,7 @@ function applyRoleRestrictions() {
     }
     
     if (userBadge) userBadge.style.display = 'flex';
-    if (roleText) roleText.textContent = '🧑‍🍳 Staff';
+    if (roleText) roleText.textContent = 'Staff';
     if (tokenText) tokenText.style.display = 'none';
   }
 }
