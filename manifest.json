@@ -1,11 +1,11 @@
 {
-  "name": "Kasir Warung",
-  "short_name": "Kasir",
-  "description": "Aplikasi Kasir Warung Mandiri dan Praktis",
+  "name": "cashirqu",
+  "short_name": "cashirqu",
+  "description": "cashirqu - Aplikasi Kasir Modern untuk Warung & Toko Anda",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#ff9800",
+  "background_color": "#0f0f14",
+  "theme_color": "#3dbf8a",
   "icons": [
     {
       "src": "icon.svg",

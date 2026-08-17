@@ -353,93 +353,108 @@
   <!-- ===== PAGE: KEUANGAN (Dashboard) ===== -->
   <section id="page-keuangan" class="page-section">
 
-    <!-- Period Selector -->
-    <div class="flex items-center justify-between mb-8" style="margin-bottom:16px;">
-      <h2 class="section-title" style="font-size:1.1rem;"><span class="icon">📊</span> Dashboard Keuangan</h2>
+    <!-- Header & Period Selector -->
+    <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px;">
+      <div>
+        <h2 class="section-title" style="font-size:1.3rem; margin-bottom:4px;">Laporan & Analisis Keuangan</h2>
+        <p style="color:var(--text-3); font-size:0.85rem;">Pantau pendapatan, pengeluaran, dan performa menu warung Anda</p>
+      </div>
       <div class="period-selector">
-        <button class="period-btn active" data-period="hari" onclick="setPeriod('hari')">Hari Ini</button>
-        <button class="period-btn" data-period="minggu" onclick="setPeriod('minggu')">Minggu</button>
+        <button class="period-btn" data-period="hari" onclick="setPeriod('hari')">Hari Ini</button>
+        <button class="period-btn active" data-period="minggu" onclick="setPeriod('minggu')">Minggu</button>
         <button class="period-btn" data-period="bulan" onclick="setPeriod('bulan')">Bulan</button>
         <button class="period-btn" data-period="semua" onclick="setPeriod('semua')">Semua</button>
       </div>
     </div>
 
-    <!-- Stat Cards -->
-    <div class="dashboard-grid">
-      <div class="stat-card accent">
-        <div class="sc-icon">💰</div>
-        <div class="sc-label">Total Pemasukan</div>
-        <div class="sc-value" id="stat-income">Rp 0</div>
+    <!-- Stat Cards: Row 1 -->
+    <div class="dashboard-grid-top" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:16px;">
+      <div class="stat-card" style="border:1px solid var(--green);">
+        <div class="sc-label" style="text-transform:uppercase; font-size:0.75rem;">Total Pemasukan</div>
+        <div class="sc-value text-success" id="stat-income">Rp 0</div>
         <div class="sc-sub" id="stat-income-sub">Hari Ini</div>
       </div>
-      <div class="stat-card" style="border-left: 4px solid var(--danger, #ef4444);">
-        <div class="sc-icon">💸</div>
-        <div class="sc-label">Total Pengeluaran</div>
-        <div class="sc-value" id="stat-expense" style="color: var(--danger, #ef4444);">Rp 0</div>
+      <div class="stat-card" style="border:1px solid var(--red);">
+        <div class="sc-label" style="text-transform:uppercase; font-size:0.75rem;">Total Pengeluaran</div>
+        <div class="sc-value text-danger" id="stat-expense">Rp 0</div>
         <div class="sc-sub" id="stat-expense-sub">Hari Ini</div>
       </div>
-      <div class="stat-card success">
-        <div class="sc-icon">✨</div>
-        <div class="sc-label">Laba Bersih</div>
+      <div class="stat-card">
+        <div class="sc-label" style="text-transform:uppercase; font-size:0.75rem;">Laba Bersih</div>
         <div class="sc-value" id="stat-net-profit">Rp 0</div>
         <div class="sc-sub" id="stat-net-profit-sub">Hari Ini</div>
       </div>
-      <div class="stat-card success" style="border-left-color: #3dbf8a;">
-        <div class="sc-icon">🧾</div>
-        <div class="sc-label">Jumlah Transaksi</div>
-        <div class="sc-value" id="stat-txn">0</div>
+      <div class="stat-card">
+        <div class="sc-label" style="text-transform:uppercase; font-size:0.75rem;">Jumlah Transaksi</div>
+        <div class="sc-value" id="stat-txn" style="font-size:1.1rem; padding-top:4px;">0 Transaksi</div>
         <div class="sc-sub" id="stat-txn-sub">Hari Ini</div>
-      </div>
-      <div class="stat-card info">
-        <div class="sc-icon">📈</div>
-        <div class="sc-label">Rata-rata</div>
-        <div class="sc-value" id="stat-avg">Rp 0</div>
-        <div class="sc-sub" id="stat-avg-sub">per transaksi</div>
-      </div>
-      <div class="stat-card purple">
-        <div class="sc-icon">📦</div>
-        <div class="sc-label">Item Terjual</div>
-        <div class="sc-value" id="stat-items">0</div>
-        <div class="sc-sub" id="stat-items-sub">item terjual</div>
       </div>
     </div>
 
+    <!-- Stat Cards: Row 2 -->
+    <div class="dashboard-grid-bottom" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-bottom:24px;">
+      <div class="stat-card" style="display:flex; align-items:center; gap:16px; padding:16px;">
+        <div class="sc-icon-box" style="width:40px; height:40px; background:var(--green-dim); color:var(--green); border-radius:8px; display:flex; align-items:center; justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div>
+          <div class="sc-label">Rata-rata per Transaksi</div>
+          <div class="sc-value" id="stat-avg" style="font-size:1.1rem;">Rp 0</div>
+        </div>
+      </div>
+      <div class="stat-card" style="display:flex; align-items:center; gap:16px; padding:16px;">
+        <div class="sc-icon-box" style="width:40px; height:40px; background:rgba(59, 130, 246, 0.1); color:#3b82f6; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </div>
+        <div>
+          <div class="sc-label">Item Terjual</div>
+          <div class="sc-value" id="stat-items" style="font-size:1.1rem;">0 item terjual</div>
+        </div>
+      </div>
+    </div>
 
-    <!-- Charts -->
-    <div class="chart-grid">
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">📊 Grafik Pemasukan</h3>
+    <!-- Charts & Top Items -->
+    <div class="chart-grid" style="display:grid; grid-template-columns:2fr 1fr; gap:16px;">
+      <div class="chart-card stat-card" style="padding:20px;">
+        <div class="chart-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <h3 class="chart-title" style="font-size:1rem; font-weight:600;">Grafik Pemasukan (7 Hari Terakhir)</h3>
+          <div style="font-size:0.75rem; color:var(--text-3); display:flex; align-items:center; gap:6px;">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--green);"></span> Pemasukan Harian
+          </div>
         </div>
         <div style="height:300px;"><canvas id="income-chart"></canvas></div>
       </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">🏆 Menu Terlaris</h3>
+      <div class="chart-card stat-card" style="padding:20px;">
+        <div class="chart-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <h3 class="chart-title" style="font-size:1rem; font-weight:600; display:flex; align-items:center; gap:8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Menu Terlaris
+          </h3>
+          <a href="#" onclick="switchPage('riwayat')" style="font-size:0.75rem; color:var(--green); text-decoration:none;">Lihat Semua</a>
         </div>
-        <div style="height:300px;"><canvas id="top-items-chart"></canvas></div>
+        <div class="top-menu-list" id="top-items-list" style="display:flex; flex-direction:column; gap:12px;">
+          <!-- Menu list injected here via JS -->
+        </div>
       </div>
-    </div>
-
-    <!-- Top Items Table -->
-    <div class="section-card">
-      <div class="section-header">
-        <h2 class="section-title"><span class="icon">🥇</span> Top Menu Berdasarkan Pendapatan</h2>
-      </div>
-      <div class="section-body" id="top-items-table"></div>
     </div>
 
   </section>
 
   <!-- ===== PAGE: RIWAYAT ===== -->
   <section id="page-riwayat" class="page-section">
-    <div class="section-card">
-      <div class="section-header">
-        <h2 class="section-title"><span class="icon">📋</span> Riwayat Transaksi</h2>
-        <div class="riwayat-controls" style="display:flex; gap:8px; align-items:center;">
-          <input type="date" class="date-input" id="history-date">
-          <button class="btn btn-primary" onclick="showClosingModal()" style="padding: 8px; font-size: 0.9rem;">💼 Rekap Shift</button>
-          <button class="btn btn-secondary" onclick="exportToExcel()" id="btn-export-excel" style="padding: 8px; font-size: 0.9rem;">⬇️ Excel</button>
+    <div class="section-card" style="border:1px solid #1a73e8; padding:20px;">
+      <div class="section-header" style="padding:0; border:none; margin-bottom:20px; flex-wrap:wrap; gap:16px;">
+        <div>
+          <h2 class="section-title" style="font-size:1.1rem; margin-bottom:4px;">Riwayat Transaksi</h2>
+          <p style="color:var(--text-3); font-size:0.85rem;">Laporan riwayat pembayaran dan rekap shift kasir</p>
+        </div>
+        <div class="riwayat-controls" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <div style="position:relative; display:flex; align-items:center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute; left:10px; color:var(--text-3);"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input type="date" class="date-input" id="history-date" style="padding-left:32px; background:transparent; border:1px solid var(--border); color:var(--text); border-radius:6px; padding:8px 8px 8px 32px; font-family:inherit; font-size:0.85rem;">
+          </div>
+          <button class="btn" onclick="showClosingModal()" style="padding: 8px 12px; font-size: 0.85rem; background:var(--green-dim); color:var(--green); border:1px solid var(--green-border);">Rekap Shift</button>
+          <button class="btn btn-secondary" onclick="exportToExcel()" id="btn-export-excel" style="padding: 8px 12px; font-size: 0.85rem; background:transparent; border:1px solid var(--border);">Ekspor Excel</button>
         </div>
       </div>
       <div class="daily-summary" id="history-summary"></div>
@@ -449,15 +464,18 @@
 
   <!-- ===== PAGE: KELOLA MENU ===== -->
   <section id="page-menu" class="page-section">
-    <div class="section-card">
-      <div class="section-header">
-        <h2 class="section-title"><span class="icon">⚙️</span> Kelola Menu</h2>
-        <div class="riwayat-controls">
-          <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="menu-search" placeholder="Cari menu...">
+    <div class="section-card" style="padding:20px;">
+      <div class="section-header" style="padding:0; border:none; margin-bottom:20px; flex-wrap:wrap; gap:16px;">
+        <div>
+          <h2 class="section-title" style="font-size:1.1rem; margin-bottom:4px;">Daftar Menu Warung</h2>
+          <p style="color:var(--text-3); font-size:0.85rem;">Kelola, tambah, dan edit produk warung Anda</p>
+        </div>
+        <div class="riwayat-controls" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+          <div class="search-box" style="position:relative; display:flex; align-items:center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute; left:12px; color:var(--text-3);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="menu-search" placeholder="Cari menu..." style="padding:10px 12px 10px 36px; background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:8px; width:220px; font-size:0.85rem;">
           </div>
-          <button class="btn btn-primary" onclick="showAddMenuModal()">➕ Tambah Menu</button>
+          <button class="btn btn-primary" onclick="showAddMenuModal()" style="padding:10px 16px; background:var(--green); color:#000; font-weight:600; border:none;">+ Tambah Menu</button>
         </div>
       </div>
       <div id="menu-manage-list"></div>

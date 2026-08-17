@@ -1110,8 +1110,10 @@ function renderHistory() {
 
   // Summary
   document.getElementById('history-summary').innerHTML = `
-    <span class="ds-label">📅 ${formatDate(selectedDate)} &nbsp;·&nbsp; <span class="ds-count">${filteredTxn.length} transaksi</span></span>
-    <span class="ds-value">${formatRupiah(dayTotal)}</span>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <span style="font-weight:600; font-size:0.95rem;">${formatDate(selectedDate)}</span>
+      <span style="color:var(--text-3); font-size:0.85rem;">${filteredTxn.length} Transaksi</span>
+    </div>
   `;
 
   // Gabungkan transaksi + pengeluaran, sort by time
@@ -1121,52 +1123,74 @@ function renderHistory() {
   ].sort((a, b) => b.time - a.time);
 
   if (combinedItems.length === 0) {
-    container.innerHTML = `<div class="history-empty">📭 Belum ada transaksi atau pengeluaran pada tanggal ini</div>`;
+    container.innerHTML = `<div class="history-empty" style="text-align:center; padding:40px; color:var(--text-3);">Belum ada transaksi atau pengeluaran pada tanggal ini</div>`;
     return;
   }
 
-  container.innerHTML = combinedItems.map(item => {
-    if (item.type === 'txn') {
-      const t = item.data;
-      return `
-        <div class="history-item" onclick="showTxnDetail(${t.id})">
-          <div class="hi-top">
-            <span class="hi-id">#${t.id} <span style="color:var(--text-muted);font-weight:400;font-size:0.75rem;">· ${t.orderType || '-'}</span></span>
-            <span class="hi-time">${formatTime(t.date)}</span>
-          </div>
-          <div class="hi-items">${t.items.map(i => `${i.emoji || '🍽️'} ${i.name} x${i.qty}`).join(', ')}</div>
-          <div class="flex justify-between items-center mt-12">
-            <span style="font-size:0.72rem;padding:2px 6px;background:var(--bg-card);border-radius:4px;color:${t.paymentMethod === 'Non Tunai' ? '#ee4d2d' : 'var(--success)'}">${t.paymentMethod === 'Non Tunai' ? '📱 Non Tunai' : '💵 Tunai'}</span>
-            <span class="hi-total">${formatRupiah(t.total)}</span>
-          </div>
-        </div>`;
-    } else {
-      const e = item.data;
-      return `
-        <div class="history-item" style="border-left: 3px solid var(--danger, #ef4444);">
-          <div class="hi-top">
-            <span class="hi-id" style="color:var(--danger,#ef4444);">💸 Pengeluaran</span>
-            <span class="hi-time">${formatTime(e.timestamp)}</span>
-          </div>
-          <div class="hi-items">${e.desc}</div>
-          <div class="flex justify-between items-center mt-12">
-            <span style="font-size:0.72rem;padding:2px 6px;background:rgba(239,68,68,0.1);border-radius:4px;color:var(--danger,#ef4444);">Pengeluaran</span>
-            <span class="hi-total" style="color:var(--danger,#ef4444);">- ${formatRupiah(e.amount)}</span>
-          </div>
-        </div>`;
-    }
-  }).join('');
+  container.innerHTML = `
+    <div style="overflow-x:auto;">
+      <table class="history-table" style="width:100%; border-collapse:collapse; text-align:left;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border); color:var(--text-3); font-size:0.75rem; text-transform:uppercase;">
+            <th style="padding:12px 16px;">Waktu</th>
+            <th style="padding:12px 16px;">ID Transaksi</th>
+            <th style="padding:12px 16px;">Detail Item</th>
+            <th style="padding:12px 16px;">Pembayaran</th>
+            <th style="padding:12px 16px;">Total</th>
+            <th style="padding:12px 16px; text-align:right;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${combinedItems.map(item => {
+            if (item.type === 'txn') {
+              const t = item.data;
+              return `
+                <tr style="border-bottom:1px solid var(--border); transition:background 0.2s; cursor:pointer;" onmouseover="this.style.background='var(--bg-3)'" onmouseout="this.style.background='transparent'" onclick="showTxnDetail(${t.id})">
+                  <td style="padding:12px 16px; color:var(--text-2); font-size:0.85rem;">${formatTime(t.date)}</td>
+                  <td style="padding:12px 16px; color:var(--white); font-weight:500; font-size:0.85rem;">#${t.id}</td>
+                  <td style="padding:12px 16px; color:var(--text-2); font-size:0.85rem;">${t.items.map(i => `${i.name} x${i.qty}`).join(', ')}</td>
+                  <td style="padding:12px 16px;">
+                    <span style="background:${t.paymentMethod === 'Non Tunai' ? 'rgba(59, 130, 246, 0.1)' : 'var(--green-dim)'}; color:${t.paymentMethod === 'Non Tunai' ? '#3b82f6' : 'var(--green)'}; padding:4px 8px; border-radius:4px; font-size:0.75rem;">${t.paymentMethod}</span>
+                  </td>
+                  <td style="padding:12px 16px; color:var(--white); font-weight:600; font-size:0.85rem;">${formatRupiah(t.total)}</td>
+                  <td style="padding:12px 16px; text-align:right;">
+                    <span style="background:var(--green-dim); color:var(--green); padding:4px 8px; border-radius:4px; font-size:0.75rem;">Selesai</span>
+                  </td>
+                </tr>
+              `;
+            } else {
+              const e = item.data;
+              return `
+                <tr style="border-bottom:1px solid var(--border); transition:background 0.2s;" onmouseover="this.style.background='var(--bg-3)'" onmouseout="this.style.background='transparent'">
+                  <td style="padding:12px 16px; color:var(--text-2); font-size:0.85rem;">${formatTime(e.timestamp)}</td>
+                  <td style="padding:12px 16px; color:var(--red); font-weight:500; font-size:0.85rem;">Pengeluaran</td>
+                  <td style="padding:12px 16px; color:var(--text-2); font-size:0.85rem;">${e.desc}</td>
+                  <td style="padding:12px 16px;">
+                    <span style="background:rgba(239, 68, 68, 0.1); color:var(--red); padding:4px 8px; border-radius:4px; font-size:0.75rem;">Tunai</span>
+                  </td>
+                  <td style="padding:12px 16px; color:var(--red); font-weight:600; font-size:0.85rem;">- ${formatRupiah(e.amount)}</td>
+                  <td style="padding:12px 16px; text-align:right;">
+                    <span style="background:rgba(239, 68, 68, 0.1); color:var(--red); padding:4px 8px; border-radius:4px; font-size:0.75rem;">Selesai</span>
+                  </td>
+                </tr>
+              `;
+            }
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
 
   // Tambahkan ringkasan pengeluaran hari ini di bawah jika ada
   if (filteredExp.length > 0) {
     container.innerHTML += `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(239,68,68,0.08);border-radius:var(--radius-md);border:1px solid rgba(239,68,68,0.2);margin-top:4px;">
-        <span style="font-size:0.82rem;color:var(--text-muted);">Total Pengeluaran Hari Ini</span>
-        <span style="font-weight:700;color:var(--danger,#ef4444);">- ${formatRupiah(dayExpTotal)}</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(239,68,68,0.05);border-radius:6px;border:1px solid rgba(239,68,68,0.2);margin-top:16px;">
+        <span style="font-size:0.85rem;color:var(--text-3);">Total Pengeluaran Hari Ini</span>
+        <span style="font-weight:600;color:var(--red);">- ${formatRupiah(dayExpTotal)}</span>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(61,191,138,0.08);border-radius:var(--radius-md);border:1px solid rgba(61,191,138,0.2);">
-        <span style="font-size:0.82rem;color:var(--text-muted);">Laba Bersih Hari Ini</span>
-        <span style="font-weight:700;color:var(--accent-primary);">= ${formatRupiah(dayTotal - dayExpTotal)}</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--green-dim);border-radius:6px;border:1px solid var(--green-border);margin-top:8px;">
+        <span style="font-size:0.85rem;color:var(--text-3);">Laba Bersih Hari Ini</span>
+        <span style="font-weight:600;color:var(--green);">= ${formatRupiah(dayTotal - dayExpTotal)}</span>
       </div>`;
   }
 }
@@ -1331,8 +1355,7 @@ function renderDashboard() {
   // Render charts and list
   renderIncomeChart(filteredTxns, period);
   renderExpenseList(filteredExpenses);
-  renderTopItemsChart(filteredTxns);
-  renderTopItemsTable(filteredTxns);
+  renderTopItemsList(filteredTxns);
 }
 
 // Chart instances
@@ -1474,123 +1497,41 @@ function renderIncomeChart(transactions, period) {
   });
 }
 
-function renderTopItemsChart(transactions) {
-  const canvasEl = document.getElementById('top-items-chart');
-  if (!canvasEl) return;
-  const ctx = canvasEl.getContext('2d');
-  if (!ctx) return;
-  if (topItemsChartInstance) topItemsChartInstance.destroy();
-
-  // Count items
-  const itemMap = {};
-  transactions.forEach(t => {
-    t.items.forEach(i => {
-      if (!itemMap[i.name]) itemMap[i.name] = { qty: 0, revenue: 0, emoji: i.emoji };
-      itemMap[i.name].qty += i.qty;
-      itemMap[i.name].revenue += i.subtotal;
-    });
-  });
-
-  const sorted = Object.entries(itemMap).sort((a, b) => b[1].qty - a[1].qty).slice(0, 6);
-
-  if (sorted.length === 0) {
-    ctx.canvas.parentElement.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:0.85rem;">Belum ada data</div>';
-    return;
-  }
-
-  const colors = [
-    'rgba(245, 158, 11, 0.8)',
-    'rgba(251, 146, 60, 0.8)',
-    'rgba(34, 197, 94, 0.8)',
-    'rgba(59, 130, 246, 0.8)',
-    'rgba(168, 85, 247, 0.8)',
-    'rgba(239, 68, 68, 0.8)',
-  ];
-
-  topItemsChartInstance = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: sorted.map(([name, d]) => `${d.emoji} ${name}`),
-      datasets: [{
-        data: sorted.map(([, d]) => d.qty),
-        backgroundColor: colors.slice(0, sorted.length),
-        borderColor: '#22222e',
-        borderWidth: 3,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '65%',
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            color: '#9a9ab0',
-            font: { size: 11, family: 'Inter' },
-            padding: 12,
-            usePointStyle: true,
-            pointStyleWidth: 10,
-          }
-        },
-        tooltip: {
-          backgroundColor: '#22222e',
-          titleColor: '#f1f1f5',
-          bodyColor: '#9a9ab0',
-          borderColor: 'rgba(255,255,255,0.1)',
-          borderWidth: 1,
-          padding: 12,
-          cornerRadius: 8,
-          callbacks: {
-            label: (ctx) => ` ${ctx.parsed} item terjual`,
-          }
-        }
-      }
-    }
-  });
-}
-
-function renderTopItemsTable(transactions) {
-  const container = document.getElementById('top-items-table');
+function renderTopItemsList(transactions) {
+  const container = document.getElementById('top-items-list');
+  if (!container) return;
 
   const itemMap = {};
   transactions.forEach(t => {
     t.items.forEach(i => {
-      if (!itemMap[i.name]) itemMap[i.name] = { qty: 0, revenue: 0, emoji: i.emoji };
+      if (!itemMap[i.name]) itemMap[i.name] = { qty: 0, category: i.category || 'Lainnya' };
       itemMap[i.name].qty += i.qty;
-      itemMap[i.name].revenue += i.subtotal;
     });
   });
 
-  const sorted = Object.entries(itemMap).sort((a, b) => b[1].revenue - a[1].revenue).slice(0, 5);
+  const sorted = Object.entries(itemMap).sort((a, b) => b[1].qty - a[1].qty).slice(0, 5);
 
   if (sorted.length === 0) {
-    container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem;">Belum ada data</div>';
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-3);font-size:0.85rem;">Belum ada data</div>';
     return;
   }
 
-  container.innerHTML = `
-    <table class="top-items-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Menu</th>
-          <th style="text-align:center">Qty</th>
-          <th style="text-align:right">Pendapatan</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${sorted.map(([name, d], i) => `
-          <tr>
-            <td class="rank">${i + 1}</td>
-            <td><div class="item-col">${d.emoji} ${name}</div></td>
-            <td class="qty-col">${d.qty}</td>
-            <td class="revenue-col">${formatRupiah(d.revenue)}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
+  container.innerHTML = sorted.map(([name, d], i) => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg-2); border-radius:8px; border:1px solid var(--border);">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:28px; height:28px; background:var(--green-dim); color:var(--green); font-weight:700; font-size:0.8rem; display:flex; align-items:center; justify-content:center; border-radius:6px;">
+          ${i + 1}
+        </div>
+        <div>
+          <div style="font-weight:600; font-size:0.9rem; color:var(--white);">${name}</div>
+          <div style="font-size:0.75rem; color:var(--text-3);">${d.category}</div>
+        </div>
+      </div>
+      <div style="font-weight:600; font-size:0.85rem; color:var(--green);">
+        ${d.qty} Porsi
+      </div>
+    </div>
+  `).join('');
 }
 
 function setPeriod(period) {
@@ -1623,21 +1564,48 @@ function renderMenuManage() {
     return;
   }
 
-  container.innerHTML = filtered.map(item => `
-    <div class="menu-manage-item">
-      <div class="mmi-thumb">
-        ${item.image ? `<img src="${item.image}">` : `<div class="mmi-thumb-placeholder">${item.emoji || '🍽️'}</div>`}
-      </div>
-      <div class="mmi-info">
-        <div class="mmi-name">${item.name}</div>
-        <div class="mmi-meta">${item.category} · ${formatRupiah(item.price)}</div>
-      </div>
-      <div class="mmi-actions">
-        <button class="btn btn-secondary btn-icon" onclick="editMenu(${item.id})" title="Edit">✏️</button>
-        <button class="btn btn-danger btn-icon" onclick="deleteMenu(${item.id})" title="Hapus">🗑</button>
-      </div>
+  container.innerHTML = `
+    <div style="overflow-x:auto;">
+      <table class="menu-manage-table" style="width:100%; border-collapse:collapse; text-align:left;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border); color:var(--text-3); font-size:0.75rem; text-transform:uppercase;">
+            <th style="padding:12px 16px; width:60px;">Foto</th>
+            <th style="padding:12px 16px;">Nama Produk</th>
+            <th style="padding:12px 16px;">Kategori</th>
+            <th style="padding:12px 16px;">Harga Jual</th>
+            <th style="padding:12px 16px; text-align:right;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.map(item => `
+            <tr style="border-bottom:1px solid var(--border); transition:background 0.2s;" onmouseover="this.style.background='var(--bg-3)'" onmouseout="this.style.background='transparent'">
+              <td style="padding:12px 16px;">
+                <div style="width:40px; height:40px; background:var(--bg-4); border-radius:6px; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                  ${item.image ? `<img src="${item.image}" style="width:100%; height:100%; object-fit:cover;">` : (item.name.charAt(0).toUpperCase())}
+                </div>
+              </td>
+              <td style="padding:12px 16px;">
+                <div style="font-weight:600; color:var(--white);">${item.name}</div>
+                <div style="font-size:0.75rem; color:var(--text-3);">ID: PRD-${String(item.id).padStart(3, '0')}</div>
+              </td>
+              <td style="padding:12px 16px;">
+                <span style="background:var(--bg-4); color:var(--text-2); padding:4px 10px; border-radius:4px; font-size:0.75rem;">${item.category}</span>
+              </td>
+              <td style="padding:12px 16px; font-weight:600; color:var(--white);">
+                ${formatRupiah(item.price)}
+              </td>
+              <td style="padding:12px 16px; text-align:right;">
+                <div style="display:inline-flex; gap:8px;">
+                  <button class="btn btn-secondary btn-icon" onclick="editMenu(${item.id})" title="Edit" style="padding:6px 10px; background:var(--bg-4); border:1px solid var(--border); border-radius:6px; color:var(--text-2);">✎</button>
+                  <button class="btn btn-danger btn-icon" onclick="deleteMenu(${item.id})" title="Hapus" style="padding:6px 10px; background:var(--red-dim); color:var(--red); border:1px solid var(--red); border-radius:6px; opacity:0.8;">✕</button>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
     </div>
-  `).join('');
+  `;
 }
 
 // Emoji arrays removed, replaced with image upload logic
