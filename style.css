@@ -610,7 +610,14 @@ body {
   padding: 18px;
   position: relative; overflow: hidden;
 }
-.stat-card::before { display: none; }
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.stat-card.accent::before { background: var(--green); }
+.stat-card.success::before { background: var(--green); }
+.stat-card.danger::before { background: var(--red); }
+.stat-card.info::before { background: #60a5fa; }
+.stat-card.purple::before { background: #a78bfa; }
 
 .stat-card .sc-icon {
   display: none;
