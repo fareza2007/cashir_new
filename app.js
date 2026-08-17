@@ -1141,41 +1141,62 @@ function renderHistory() {
           </tr>
         </thead>
         <tbody>
-          ${combinedItems.map(item => {
-            if (item.type === 'txn') {
-              const t = item.data;
-              return `
-                <tr style="border-bottom:1px solid var(--border); transition:background 0.2s; cursor:pointer;" onmouseover="this.style.background='var(--bg-3)'" onmouseout="this.style.background='transparent'" onclick="showTxnDetail(${t.id})">
-                  <td style="padding:12px 16px; color:var(--text-2); font-size:0.85rem;">${formatTime(t.date)}</td>
-                  <td style="padding:12px 16px; color:var(--white); font-weight:500; font-size:0.85rem;">#${t.id}</td>
-                  <td style="padding:12px 16px; color:var(--text-2); font-size:0.85rem;">${t.items.map(i => `${i.name} x${i.qty}`).join(', ')}</td>
-                  <td style="padding:12px 16px;">
-                    <span style="background:${t.paymentMethod === 'Non Tunai' ? 'rgba(59, 130, 246, 0.1)' : 'var(--green-dim)'}; color:${t.paymentMethod === 'Non Tunai' ? '#3b82f6' : 'var(--green)'}; padding:4px 8px; border-radius:4px; font-size:0.75rem;">${t.paymentMethod}</span>
-                  </td>
-                  <td style="padding:12px 16px; color:var(--white); font-weight:600; font-size:0.85rem;">${formatRupiah(t.total)}</td>
-                  <td style="padding:12px 16px; text-align:right;">
-                    <span style="background:var(--green-dim); color:var(--green); padding:4px 8px; border-radius:4px; font-size:0.75rem;">Selesai</span>
-                  </td>
-                </tr>
-              `;
-            } else {
-              const e = item.data;
-              return `
-                <tr style="border-bottom:1px solid var(--border); transition:background 0.2s;" onmouseover="this.style.background='var(--bg-3)'" onmouseout="this.style.background='transparent'">
-                  <td style="padding:12px 16px; color:var(--text-2); font-size:0.85rem;">${formatTime(e.timestamp)}</td>
-                  <td style="padding:12px 16px; color:var(--red); font-weight:500; font-size:0.85rem;">Pengeluaran</td>
-                  <td style="padding:12px 16px; color:var(--text-2); font-size:0.85rem;">${e.desc}</td>
-                  <td style="padding:12px 16px;">
-                    <span style="background:rgba(239, 68, 68, 0.1); color:var(--red); padding:4px 8px; border-radius:4px; font-size:0.75rem;">Tunai</span>
-                  </td>
-                  <td style="padding:12px 16px; color:var(--red); font-weight:600; font-size:0.85rem;">- ${formatRupiah(e.amount)}</td>
-                  <td style="padding:12px 16px; text-align:right;">
-                    <span style="background:rgba(239, 68, 68, 0.1); color:var(--red); padding:4px 8px; border-radius:4px; font-size:0.75rem;">Selesai</span>
-                  </td>
-                </tr>
-              `;
-            }
-          }).join('')}
+          ${(() => {
+            let currentGroupDate = null;
+            const rowsHtml = [];
+            combinedItems.forEach(item => {
+              const dateStr = formatDate(item.time);
+              if (dateStr !== currentGroupDate) {
+                const itemsForDate = combinedItems.filter(i => formatDate(i.time) === dateStr);
+                const totalAmount = itemsForDate.reduce((sum, i) => i.type === 'txn' ? sum + i.data.total : sum - i.data.amount, 0);
+                const txnC = itemsForDate.filter(i => i.type === 'txn').length;
+                rowsHtml.push(`
+                  <tr style="background:var(--bg-3); border-bottom:1px solid var(--border);">
+                    <td colspan="4" style="padding:12px 16px; font-weight:700; color:var(--white); font-size:0.85rem;">${dateStr}</td>
+                    <td colspan="2" style="padding:12px 16px; text-align:right; color:var(--green); font-size:0.8rem;">${txnC} transaksi - ${formatRupiah(totalAmount)}</td>
+                  </tr>
+                `);
+                currentGroupDate = dateStr;
+              }
+
+              if (item.type === 'txn') {
+                const t = item.data;
+                const totalItemsCount = t.items.reduce((s,i)=>s+i.qty, 0);
+                const itemsDesc = t.items.map(i => `${i.name}${i.qty>1?' x'+i.qty:''}`).join(', ');
+                rowsHtml.push(`
+                  <tr style="border-bottom:1px solid var(--border); transition:background 0.2s; cursor:pointer;" onmouseover="this.style.background='var(--bg-3)'" onmouseout="this.style.background='transparent'" onclick="showTxnDetail(${t.id})">
+                    <td style="padding:12px 16px; color:var(--text-3); font-size:0.8rem;">${formatTime(t.date)}</td>
+                    <td style="padding:12px 16px; color:var(--text-2); font-weight:500; font-size:0.8rem;">TX-${String(t.id).padStart(6,'0')}</td>
+                    <td style="padding:12px 16px; color:var(--text-3); font-size:0.8rem;">${totalItemsCount} item (${itemsDesc})</td>
+                    <td style="padding:12px 16px;">
+                      <span style="background:var(--bg-4); color:var(--text-3); padding:4px 10px; border-radius:4px; font-size:0.75rem;">${t.paymentMethod === 'Non Tunai' ? 'Qris' : 'Tunai'}</span>
+                    </td>
+                    <td style="padding:12px 16px; color:var(--white); font-weight:600; font-size:0.85rem;">${formatRupiah(t.total)}</td>
+                    <td style="padding:12px 16px; text-align:right;">
+                      <span style="background:var(--green-dim); color:var(--green); padding:4px 10px; border-radius:4px; font-size:0.75rem;">Selesai</span>
+                    </td>
+                  </tr>
+                `);
+              } else {
+                const e = item.data;
+                rowsHtml.push(`
+                  <tr style="border-bottom:1px solid var(--border); transition:background 0.2s;" onmouseover="this.style.background='var(--bg-3)'" onmouseout="this.style.background='transparent'">
+                    <td style="padding:12px 16px; color:var(--text-3); font-size:0.8rem;">${formatTime(e.timestamp)}</td>
+                    <td style="padding:12px 16px; color:var(--red); font-weight:500; font-size:0.8rem;">PENGELUARAN</td>
+                    <td style="padding:12px 16px; color:var(--text-3); font-size:0.8rem;">${e.desc}</td>
+                    <td style="padding:12px 16px;">
+                      <span style="background:var(--bg-4); color:var(--text-3); padding:4px 10px; border-radius:4px; font-size:0.75rem;">Tunai</span>
+                    </td>
+                    <td style="padding:12px 16px; color:var(--red); font-weight:600; font-size:0.85rem;">- ${formatRupiah(e.amount)}</td>
+                    <td style="padding:12px 16px; text-align:right;">
+                      <span style="background:var(--green-dim); color:var(--green); padding:4px 10px; border-radius:4px; font-size:0.75rem;">Selesai</span>
+                    </td>
+                  </tr>
+                `);
+              }
+            });
+            return rowsHtml.join('');
+          })()}
         </tbody>
       </table>
     </div>
@@ -1517,7 +1538,7 @@ function renderTopItemsList(transactions) {
   }
 
   container.innerHTML = sorted.map(([name, d], i) => `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg-2); border-radius:8px; border:1px solid var(--border);">
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg-3); border-radius:8px; border:none;">
       <div style="display:flex; align-items:center; gap:12px;">
         <div style="width:28px; height:28px; background:var(--green-dim); color:var(--green); font-weight:700; font-size:0.8rem; display:flex; align-items:center; justify-content:center; border-radius:6px;">
           ${i + 1}
@@ -1577,7 +1598,11 @@ function renderMenuManage() {
           </tr>
         </thead>
         <tbody>
-          ${filtered.map(item => `
+          ${filtered.map(item => {
+            let catStyle = 'background:var(--bg-4); color:var(--text-2);';
+            if(item.category.toLowerCase() === 'makanan') catStyle = 'background:rgba(59, 130, 246, 0.1); color:#3b82f6;';
+            if(item.category.toLowerCase() === 'minuman') catStyle = 'background:rgba(245, 158, 11, 0.1); color:#f59e0b;';
+            return `
             <tr style="border-bottom:1px solid var(--border); transition:background 0.2s;" onmouseover="this.style.background='var(--bg-3)'" onmouseout="this.style.background='transparent'">
               <td style="padding:12px 16px;">
                 <div style="width:40px; height:40px; background:var(--bg-4); border-radius:6px; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
@@ -1589,19 +1614,24 @@ function renderMenuManage() {
                 <div style="font-size:0.75rem; color:var(--text-3);">ID: PRD-${String(item.id).padStart(3, '0')}</div>
               </td>
               <td style="padding:12px 16px;">
-                <span style="background:var(--bg-4); color:var(--text-2); padding:4px 10px; border-radius:4px; font-size:0.75rem;">${item.category}</span>
+                <span style="padding:4px 10px; border-radius:4px; font-size:0.75rem; ${catStyle}">${item.category}</span>
               </td>
               <td style="padding:12px 16px; font-weight:600; color:var(--white);">
                 ${formatRupiah(item.price)}
               </td>
               <td style="padding:12px 16px; text-align:right;">
                 <div style="display:inline-flex; gap:8px;">
-                  <button class="btn btn-secondary btn-icon" onclick="editMenu(${item.id})" title="Edit" style="padding:6px 10px; background:var(--bg-4); border:1px solid var(--border); border-radius:6px; color:var(--text-2);">✎</button>
-                  <button class="btn btn-danger btn-icon" onclick="deleteMenu(${item.id})" title="Hapus" style="padding:6px 10px; background:var(--red-dim); color:var(--red); border:1px solid var(--red); border-radius:6px; opacity:0.8;">✕</button>
+                  <button class="btn btn-secondary btn-icon" onclick="editMenu(${item.id})" title="Edit" style="padding:6px 8px; background:var(--bg-4); border:none; border-radius:4px; color:var(--text-2);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                  </button>
+                  <button class="btn btn-danger btn-icon" onclick="deleteMenu(${item.id})" title="Hapus" style="padding:6px 8px; background:rgba(239, 68, 68, 0.15); color:var(--red); border:none; border-radius:4px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
                 </div>
               </td>
             </tr>
-          `).join('')}
+            `;
+          }).join('')}
         </tbody>
       </table>
     </div>
