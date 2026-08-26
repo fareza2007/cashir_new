@@ -1395,7 +1395,7 @@ function renderExpenseList(expenses) {
   let listEl = document.getElementById('expense-list-container');
   
   if (!listEl) {
-    const chartsWrap = document.querySelector('.dashboard-charts');
+    const chartsWrap = document.querySelector('.chart-grid');
     if (chartsWrap) {
       const containerHTML = `
         <div class="section-card" style="margin-top: 20px;">
@@ -1419,15 +1419,17 @@ function renderExpenseList(expenses) {
   
   const sorted = [...expenses].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
   
-  listEl.innerHTML = sorted.map(e => `
-    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card-hover); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border);">
-      <div>
-        <div style="font-weight:600; font-size:1rem; margin-bottom:4px;">${e.desc}</div>
-        <div style="font-size:0.75rem; color:var(--text-muted);">${formatDate(e.date)} - ${formatTime(e.timestamp)}</div>
+  if (listEl) {
+    listEl.innerHTML = sorted.map(e => `
+      <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card-hover); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border);">
+        <div>
+          <div style="font-weight:600; font-size:1rem; margin-bottom:4px;">${e.desc}</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">${formatDate(e.date)} - ${formatTime(e.timestamp)}</div>
+        </div>
+        <div style="font-weight:700; color:var(--text-danger);">${formatRupiah(e.amount)}</div>
       </div>
-      <div style="font-weight:700; color:var(--text-danger);">${formatRupiah(e.amount)}</div>
-    </div>
-  `).join('');
+    `).join('');
+  }
 }
 
 function renderIncomeChart(transactions, period) {
