@@ -541,6 +541,14 @@ async function loginAsKaryawan(autoCode = null) {
       state.shopName     = data.shopName;
       state.employeeCode = data.employeeCode;
       state.uid          = null;
+
+      // Autentikasi anonim agar Firebase Security Rules mengizinkan write
+      try {
+        await auth.signInAnonymously();
+      } catch (authErr) {
+        console.warn('Anonymous auth failed:', authErr);
+        // We still continue, but write might fail if rules enforce request.auth != null
+      }
       
       // Simpan untuk auto login
       localStorage.setItem('kasir_karyawanCode', code);
