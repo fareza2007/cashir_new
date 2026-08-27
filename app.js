@@ -83,20 +83,20 @@ function getCategories() {
 // --- Data Storage ---
 function trimOldData() {
   // Batasi data agar dokumen Firestore tidak melebihi 1MB
-  // Simpan hanya 7 hari terakhir, maksimal 1500 transaksi & 1500 pengeluaran (untuk warung ramai)
+  // Simpan 40 hari terakhir (laporan bulanan aman), maksimal 3000 transaksi & 3000 pengeluaran
   const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - 7);
+  cutoff.setDate(cutoff.getDate() - 40);
   const cutoffStr = cutoff.toISOString().split('T')[0];
 
   if (state.transactions && state.transactions.length > 0) {
     state.transactions = state.transactions
       .filter(t => t.date && t.date.split('T')[0] >= cutoffStr)
-      .slice(-1500);
+      .slice(-3000);
   }
   if (state.expenses && state.expenses.length > 0) {
     state.expenses = state.expenses
       .filter(e => e.date && e.date >= cutoffStr)
-      .slice(-1500);
+      .slice(-3000);
   }
 }
 
@@ -2146,7 +2146,7 @@ function editShopName() {
 async function emergencyCleanData() {
   if (state.role !== 'Owner') return;
   const sebelum = (state.expenses || []).length + (state.transactions || []).length;
-  if (!confirm(`Data saat ini:\n- Pengeluaran: ${(state.expenses||[]).length} entries\n- Transaksi: ${(state.transactions||[]).length} entries\n\nHapus data pengeluaran & transaksi yang lebih dari 7 hari lalu?\n(Pastikan Anda sudah Ekspor Excel terlebih dahulu)`)) return;
+  if (!confirm(`Data saat ini:\n- Pengeluaran: ${(state.expenses||[]).length} entries\n- Transaksi: ${(state.transactions||[]).length} entries\n\nHapus data pengeluaran & transaksi yang lebih dari 40 hari lalu?\n(Data bulan ini tetap aman)`)) return;
   
   trimOldData();
   const sesudah = (state.expenses || []).length + (state.transactions || []).length;
