@@ -81,8 +81,30 @@ function getCategories() {
 }
 
 // --- Data Storage ---
+function trimOldData() {
+  // Batasi data agar dokumen Firestore tidak melebihi 1MB
+  // Simpan hanya 90 hari terakhir, maksimal 500 transaksi & 500 pengeluaran
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 90);
+  const cutoffStr = cutoff.toISOString().split('T')[0];
+
+  if (state.transactions && state.transactions.length > 0) {
+    state.transactions = state.transactions
+      .filter(t => t.date && t.date.split('T')[0] >= cutoffStr)
+      .slice(-500);
+  }
+  if (state.expenses && state.expenses.length > 0) {
+    state.expenses = state.expenses
+      .filter(e => e.date && e.date >= cutoffStr)
+      .slice(-500);
+  }
+}
+
 function saveData() {
   if (!state.token || !db) return;
+
+  // Trim data sebelum save agar tidak melebihi limit Firestore
+  trimOldData();
   
   db.collection('shops').doc(state.token).set({
     shopName: state.shopName,
@@ -2117,6 +2139,27 @@ function editShopName() {
     } else {
       alert('Nama warung tidak boleh kosong!');
     }
+  }
+}
+
+// Bersihkan data lama yang menyebabkan Firestore penuh
+async function emergencyCleanData() {
+  if (state.role !== 'Owner') return;
+  const sebelum = (state.expenses || []).length + (state.transactions || []).length;
+  if (!confirm(`Data saat ini:\n- Pengeluaran: ${(state.expenses||[]).length} entries\n- Transaksi: ${(state.transactions||[]).length} entries\n\nHapus data pengeluaran & transaksi yang lebih dari 90 hari lalu?\n(Data 90 hari terakhir tetap aman)`)) return;
+  
+  trimOldData();
+  const sesudah = (state.expenses || []).length + (state.transactions || []).length;
+
+  try {
+    await db.collection('shops').doc(state.token).update({
+      expenses: state.expenses || [],
+      transactions: state.transactions || [],
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert(`Pembersihan berhasil!\nData dikurangi dari ${sebelum} → ${sesudah} entries.\nAplikasi sekarang bisa menyimpan transaksi baru.`);
+  } catch(err) {
+    alert('Gagal membersihkan data: ' + err.message);
   }
 }
 

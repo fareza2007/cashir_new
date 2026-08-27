@@ -10,19 +10,19 @@
   <link rel="icon" href="favicon.png" type="image/png">
   <!-- CSS_INJECT -->
   
-  <!-- Midtrans Snap -->
+  <!-- Midtrans Snap (CDN only - payment gateway) -->
   <script type="text/javascript" src="https://app.midtrans.com/snap/snap.js" data-client-key="Mid-client-_NktUTsxrE6MxLOG"></script>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <!-- Firebase SDK - Local bundled for APK compatibility -->
+  <script src="libs/firebase-app.js"></script>
+  <script src="libs/firebase-firestore.js"></script>
+  <script src="libs/firebase-auth.js"></script>
   <!-- EmailJS -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="libs/emailjs.js"></script>
   <!-- Chart.js for graphics -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="libs/chart.js"></script>
   <!-- SheetJS for Excel export -->
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="libs/xlsx.js"></script>
 </head>
 <body>
 
@@ -354,16 +354,19 @@
   <section id="page-keuangan" class="page-section">
 
     <!-- Header & Period Selector -->
-    <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px;">
+    <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
       <div>
-        <h2 class="section-title" style="font-size:1.3rem; margin-bottom:4px;">Laporan & Analisis Keuangan</h2>
+        <h2 class="section-title" style="font-size:1.3rem; margin-bottom:4px;">Laporan &amp; Analisis Keuangan</h2>
         <p style="color:var(--text-3); font-size:0.85rem;">Pantau pendapatan, pengeluaran, dan performa menu warung Anda</p>
       </div>
-      <div class="period-selector">
-        <button class="period-btn" data-period="hari" onclick="setPeriod('hari')">Hari Ini</button>
-        <button class="period-btn active" data-period="minggu" onclick="setPeriod('minggu')">Minggu</button>
-        <button class="period-btn" data-period="bulan" onclick="setPeriod('bulan')">Bulan</button>
-        <button class="period-btn" data-period="semua" onclick="setPeriod('semua')">Semua</button>
+      <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+        <div class="period-selector">
+          <button class="period-btn" data-period="hari" onclick="setPeriod('hari')">Hari Ini</button>
+          <button class="period-btn active" data-period="minggu" onclick="setPeriod('minggu')">Minggu</button>
+          <button class="period-btn" data-period="bulan" onclick="setPeriod('bulan')">Bulan</button>
+          <button class="period-btn" data-period="semua" onclick="setPeriod('semua')">Semua</button>
+        </div>
+        <button onclick="emergencyCleanData()" style="font-size:0.72rem; padding:5px 10px; background:var(--bg-4); border:1px solid var(--border-2); color:var(--text-3); border-radius:6px; cursor:pointer;">Bersihkan Data Lama</button>
       </div>
     </div>
 
