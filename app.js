@@ -2620,11 +2620,14 @@ function init() {
 
   // Cek auto login
   auth.onAuthStateChanged(async (user) => {
-    authResolved = true;
-    clearTimeout(splashTimeout); // Batalkan timeout karena sudah merespons
+    // Jangan ganggu proses login jika sedang berjalan sebagai Staff
+    if (state.role === 'Staff') return;
 
-    if (user) {
-      // Auto login via Google
+    authResolved = true;
+    clearTimeout(splashTimeout);
+
+    if (user && !user.isAnonymous) {
+      // Auto login via Google (Owner)
       try {
         const shopDoc = await db.collection('shops').doc(user.uid).get();
         if (shopDoc.exists) {
@@ -2643,7 +2646,6 @@ function init() {
           const tripayOrder = urlParams.get('order_id');
           const tripayPlan = urlParams.get('plan');
           if (tripayOrder && tripayPlan) {
-            // Hapus query params dari URL agar bersih
             window.history.replaceState({}, document.title, "/");
             const statusMsg = document.getElementById('pricing-status-msg');
             if (statusMsg) {
@@ -2656,6 +2658,7 @@ function init() {
             await checkAndShowSubscription();
           }
         } else {
+          // User Google baru, belum buat warung
           state.uid          = user.uid;
           state.userEmail    = user.email;
           state.userPhotoURL = user.photoURL;
@@ -2670,6 +2673,7 @@ function init() {
         document.getElementById('welcome-overlay').classList.remove('hidden');
       }
     } else if (savedKaryawanCode) {
+      // Login sebagai staff (bisa jadi user-nya null atau isAnonymous)
       loginAsKaryawan(savedKaryawanCode);
     } else {
       hideSplash();
