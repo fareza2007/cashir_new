@@ -552,6 +552,14 @@ async function loginAsKaryawan(autoCode = null) {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Memeriksa...'; }
   
   try {
+    // Autentikasi anonim di awal agar Firebase Rules mengizinkan query read
+    try {
+      await auth.signInAnonymously();
+    } catch (authErr) {
+      console.warn('Anonymous auth failed:', authErr);
+      // Tetap lanjut, barangkali Firebase Rules masih open
+    }
+
     const snapshot = await db.collection('shops').where('employeeCode', '==', code).limit(1).get();
     
     if (!snapshot.empty) {
@@ -563,14 +571,6 @@ async function loginAsKaryawan(autoCode = null) {
       state.shopName     = data.shopName;
       state.employeeCode = data.employeeCode;
       state.uid          = null;
-
-      // Autentikasi anonim agar Firebase Security Rules mengizinkan write
-      try {
-        await auth.signInAnonymously();
-      } catch (authErr) {
-        console.warn('Anonymous auth failed:', authErr);
-        // We still continue, but write might fail if rules enforce request.auth != null
-      }
       
       // Simpan untuk auto login
       localStorage.setItem('kasir_karyawanCode', code);
