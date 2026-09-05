@@ -82,21 +82,25 @@ function getCategories() {
 
 // --- Data Storage ---
 function trimOldData() {
-  // Batasi data agar dokumen Firestore tidak melebihi 1MB
-  // Simpan 40 hari terakhir (laporan bulanan aman), maksimal 3000 transaksi & 3000 pengeluaran
+  // Simpan 40 hari terakhir (laporan bulanan aman), maksimal 3000 entri
+  // PENTING: entri yang tidak punya date TIDAK dihapus (aman)
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - 40);
-  const cutoffStr = cutoff.toISOString().split('T')[0];
+  const cutoffStr = cutoff.toISOString().split('T')[0]; // e.g. "2026-07-27"
 
-  if (state.transactions && state.transactions.length > 0) {
-    state.transactions = state.transactions
-      .filter(t => t.date && t.date.split('T')[0] >= cutoffStr)
-      .slice(-3000);
+  if (state.transactions && state.transactions.length > 3000) {
+    state.transactions = state.transactions.filter(t => {
+      if (!t.date) return true; // tidak ada tanggal → simpan
+      const d = t.date.substring(0, 10); // ambil YYYY-MM-DD dari ISO string
+      return d >= cutoffStr;
+    }).slice(-3000);
   }
-  if (state.expenses && state.expenses.length > 0) {
-    state.expenses = state.expenses
-      .filter(e => e.date && e.date >= cutoffStr)
-      .slice(-3000);
+  if (state.expenses && state.expenses.length > 3000) {
+    state.expenses = state.expenses.filter(e => {
+      if (!e.date) return true;
+      const d = e.date.substring(0, 10);
+      return d >= cutoffStr;
+    }).slice(-3000);
   }
 }
 
