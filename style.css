@@ -607,8 +607,10 @@ body {
   background: var(--bg-3);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 18px;
+  padding: 16px 18px;
   position: relative; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: space-between;
+  min-height: 100px;
 }
 .stat-card::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
@@ -619,12 +621,10 @@ body {
 .stat-card.info::before { background: #60a5fa; }
 .stat-card.purple::before { background: #a78bfa; }
 
-.stat-card .sc-icon {
-  display: none;
-}
-.stat-card .sc-label { font-size: 0.7rem; color: var(--text-3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-.stat-card .sc-value { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px; color: var(--white); }
-.stat-card .sc-sub { font-size: 0.7rem; color: var(--text-3); margin-top: 6px; }
+.stat-card .sc-icon { display: none; }
+.stat-card .sc-label { font-size: 0.68rem; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.stat-card .sc-value { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; color: var(--white); line-height: 1.1; }
+.stat-card .sc-sub { font-size: 0.68rem; color: var(--text-3); margin-top: 4px; }
 
 .chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
 .chart-card { background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 18px; }
@@ -857,10 +857,65 @@ body {
 
 /* ============================================================
    RESPONSIVE
-   ============================================================ */
+/* --- Dashboard Header --- */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* --- Stat Card Grid (4 columns desktop, 2x2 mobile) --- */
+.dashboard-grid-top {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* --- Stat Card internals --- */
+.stat-card .sc-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-3);
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+}
+.stat-card .sc-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+.stat-card .sc-sub {
+  font-size: 0.72rem;
+  color: var(--text-3);
+}
+
+/* --- Bersihkan Data Lama button --- */
+.btn-clean-data {
+  font-size: 0.72rem;
+  padding: 5px 10px;
+  background: transparent;
+  border: 1px solid var(--border-2);
+  color: var(--text-3);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: color var(--t), border-color var(--t);
+}
+.btn-clean-data:hover { color: var(--white); border-color: var(--text-2); }
+
+/* --- hide-mobile utility --- */
+.hide-mobile { display: inline; }
+
 @media (max-width: 1024px) {
   .kasir-layout { grid-template-columns: 1fr 320px; }
-  .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
   .chart-grid { grid-template-columns: 1fr; }
 }
 
@@ -871,7 +926,14 @@ body {
   html { font-size: 14px; }
   .app-container { padding: 10px; padding-bottom: 76px; }
   .app-header .nav-tabs { display: none; }
-  .app-header { padding: 10px 14px; flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .app-header { padding: 10px 14px; flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: nowrap; gap: 8px; }
+  .hide-mobile { display: none; }
+
+  /* Stat cards: 2 per row on mobile */
+  .dashboard-grid-top { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+  /* Header buttons smaller on mobile */
+  .header-buttons .btn { padding: 6px 10px !important; font-size: 0.72rem !important; }
 
   .mobile-bottom-nav {
     display: flex;
@@ -901,19 +963,14 @@ body {
   .floating-checkout { bottom: 70px !important; }
   .kasir-layout { grid-template-columns: 1fr; }
   .menu-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
-  .dashboard-grid { grid-template-columns: 1fr 1fr; }
   .chart-grid { grid-template-columns: 1fr; }
   .header-actions { width: 100%; justify-content: space-between; }
 }
 
 @media (max-width: 480px) {
-  .dashboard-grid { grid-template-columns: 1fr; }
   .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .modal { max-width: 100%; margin: 10px; }
 }
-
-.hide-mobile { display: inline; }
-@media (max-width: 600px) { .hide-mobile { display: none; } }
 
 /* --- Print --- */
 @media print {

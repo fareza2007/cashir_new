@@ -293,7 +293,7 @@
       <div class="user-role-badge" id="header-user-badge">
         <img id="user-avatar" src="" alt="" style="display:none; width:28px; height:28px; border-radius:50%; border: 2px solid var(--accent-primary); object-fit:cover;">
         <span class="badge-role" id="role-badge-text">Owner</span>
-        <span class="badge-token-info" id="token-badge-text" title="Klik untuk salin kode staff" onclick="copyEmployeeToken()" style="cursor:pointer;">Kode: —</span>
+        <span class="badge-token-info hide-mobile" id="token-badge-text" title="Klik untuk salin kode staff" onclick="copyEmployeeToken()" style="cursor:pointer;">Kode: —</span>
       </div>
       
       <div class="header-buttons" style="display: flex; gap: 8px;">
@@ -354,42 +354,39 @@
   <section id="page-keuangan" class="page-section">
 
     <!-- Header & Period Selector -->
-    <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
-      <div>
-        <h2 class="section-title" style="font-size:1.3rem; margin-bottom:4px;">Laporan &amp; Analisis Keuangan</h2>
-        <p style="color:var(--text-3); font-size:0.85rem;">Pantau pendapatan, pengeluaran, dan performa menu warung Anda</p>
-      </div>
-      <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+    <div class="dashboard-header">
+      <h2 class="section-title" style="font-size:1.1rem; margin-bottom:0;">Keuangan</h2>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
         <div class="period-selector">
-          <button class="period-btn" data-period="hari" onclick="setPeriod('hari')">Hari Ini</button>
+          <button class="period-btn" data-period="hari" onclick="setPeriod('hari')">Hari</button>
           <button class="period-btn active" data-period="minggu" onclick="setPeriod('minggu')">Minggu</button>
           <button class="period-btn" data-period="bulan" onclick="setPeriod('bulan')">Bulan</button>
           <button class="period-btn" data-period="semua" onclick="setPeriod('semua')">Semua</button>
         </div>
-        <button onclick="emergencyCleanData()" style="font-size:0.72rem; padding:5px 10px; background:var(--bg-4); border:1px solid var(--border-2); color:var(--text-3); border-radius:6px; cursor:pointer;">Bersihkan Data Lama</button>
+        <button onclick="emergencyCleanData()" class="btn-clean-data">Bersihkan</button>
       </div>
     </div>
 
-    <!-- Stat Cards: Row 1 -->
-    <div class="dashboard-grid-top" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:16px;">
+    <!-- Stat Cards: 2x2 grid -->
+    <div class="dashboard-grid-top">
       <div class="stat-card accent">
-        <div class="sc-label" style="text-transform:uppercase; font-size:0.75rem;">Total Pemasukan</div>
+        <div class="sc-label">Pemasukan</div>
         <div class="sc-value text-success" id="stat-income">Rp 0</div>
         <div class="sc-sub" id="stat-income-sub">Hari Ini</div>
       </div>
       <div class="stat-card danger">
-        <div class="sc-label" style="text-transform:uppercase; font-size:0.75rem;">Total Pengeluaran</div>
+        <div class="sc-label">Pengeluaran</div>
         <div class="sc-value text-danger" id="stat-expense">Rp 0</div>
         <div class="sc-sub" id="stat-expense-sub">Hari Ini</div>
       </div>
       <div class="stat-card">
-        <div class="sc-label" style="text-transform:uppercase; font-size:0.75rem;">Laba Bersih</div>
+        <div class="sc-label">Laba Bersih</div>
         <div class="sc-value" id="stat-net-profit">Rp 0</div>
         <div class="sc-sub" id="stat-net-profit-sub">Hari Ini</div>
       </div>
       <div class="stat-card">
-        <div class="sc-label" style="text-transform:uppercase; font-size:0.75rem;">Jumlah Transaksi</div>
-        <div class="sc-value" id="stat-txn" style="font-size:1.1rem; padding-top:4px;">0 Transaksi</div>
+        <div class="sc-label">Transaksi</div>
+        <div class="sc-value" id="stat-txn">0</div>
         <div class="sc-sub" id="stat-txn-sub">Hari Ini</div>
       </div>
     </div>
