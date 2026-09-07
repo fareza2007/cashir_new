@@ -10,19 +10,19 @@
   <link rel="icon" href="favicon.png" type="image/png">
   <!-- CSS_INJECT -->
   
-  <!-- Midtrans Snap (CDN only - payment gateway) -->
+  <!-- Midtrans Snap -->
   <script type="text/javascript" src="https://app.midtrans.com/snap/snap.js" data-client-key="Mid-client-_NktUTsxrE6MxLOG"></script>
 
-  <!-- Firebase SDK - Local bundled for APK compatibility -->
-  <script src="libs/firebase-app.js"></script>
-  <script src="libs/firebase-firestore.js"></script>
-  <script src="libs/firebase-auth.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <!-- EmailJS -->
-  <script src="libs/emailjs.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <!-- Chart.js for graphics -->
-  <script src="libs/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <!-- SheetJS for Excel export -->
-  <script src="libs/xlsx.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -34,7 +34,7 @@
     <div style="display:flex; justify-content:center; margin-bottom:6px;">
       <svg viewBox="0 0 270 65" xmlns="http://www.w3.org/2000/svg" style="width:160px; height:39px;">
         <text x="135" y="58" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="800" font-size="56" letter-spacing="-2">
-          <tspan fill="#ffffff">cashir</tspan><tspan fill="#22c55e">qu</tspan>
+          <tspan fill="#ffffff">cashir</tspan><tspan fill="#3dbf8a">qu</tspan>
         </text>
       </svg>
     </div>
@@ -44,7 +44,7 @@
     <!-- Free Trial Banner -->
     <div class="trial-banner" id="trial-banner">
       <div class="trial-banner-content">
-        <span class="trial-icon">→</span>
+        <span class="trial-icon">🎁</span>
         <div>
           <div class="trial-title">Coba GRATIS 7 Hari</div>
           <div class="trial-desc">Tidak perlu kartu kredit. Batalkan kapan saja.</div>
@@ -58,48 +58,48 @@
 
       <!-- Bulanan -->
       <div class="pricing-card">
-        <div class="plan-icon"></div>
+        <div class="plan-icon">📅</div>
         <div class="plan-name">Bulanan</div>
         <div class="plan-price">Rp 39.000<span class="plan-per">/bulan</span></div>
         <ul class="plan-features">
-          <li>Semua fitur kasir</li>
-          <li>Laporan keuangan</li>
-          <li>Multi staff</li>
-          <li>Export Excel</li>
+          <li>✅ Semua fitur kasir</li>
+          <li>✅ Laporan keuangan</li>
+          <li>✅ Multi staff</li>
+          <li>✅ Export Excel</li>
         </ul>
         <button class="btn-plan" onclick="createMidtransPayment('monthly')">Pilih Bulanan</button>
       </div>
 
       <!-- Tahunan (Featured) -->
       <div class="pricing-card pricing-card--featured">
-        <div class="plan-badge">Paling Hemat</div>
-        <div class="plan-icon"></div>
+        <div class="plan-badge">🔥 Paling Hemat</div>
+        <div class="plan-icon">📆</div>
         <div class="plan-name">Tahunan</div>
         <div class="plan-price">Rp 249.000<span class="plan-per">/tahun</span></div>
         <div class="plan-savings">Hemat 47% vs bulanan</div>
         <ul class="plan-features">
-          <li>Semua fitur kasir</li>
-          <li>Laporan keuangan</li>
-          <li>Multi staff</li>
-          <li>Export Excel</li>
-          <li>Prioritas dukungan</li>
+          <li>✅ Semua fitur kasir</li>
+          <li>✅ Laporan keuangan</li>
+          <li>✅ Multi staff</li>
+          <li>✅ Export Excel</li>
+          <li>✅ Prioritas dukungan</li>
         </ul>
         <button class="btn-plan btn-plan--featured" onclick="createMidtransPayment('yearly')">Pilih Tahunan</button>
       </div>
 
       <!-- Seumur Hidup -->
       <div class="pricing-card">
-        <div class="plan-icon"></div>
+        <div class="plan-icon">♾️</div>
         <div class="plan-name">Seumur Hidup</div>
         <div class="plan-price">Rp 599.000<span class="plan-per"> sekali bayar</span></div>
         <div class="plan-savings">Bayar sekali, pakai selamanya</div>
         <ul class="plan-features">
-          <li>Semua fitur kasir</li>
-          <li>Laporan keuangan</li>
-          <li>Multi staff</li>
-          <li>Export Excel</li>
-          <li>Update selamanya</li>
-          <li>Prioritas dukungan</li>
+          <li>✅ Semua fitur kasir</li>
+          <li>✅ Laporan keuangan</li>
+          <li>✅ Multi staff</li>
+          <li>✅ Export Excel</li>
+          <li>✅ Update selamanya</li>
+          <li>✅ Prioritas dukungan</li>
         </ul>
         <button class="btn-plan" onclick="createMidtransPayment('lifetime')">Pilih Seumur Hidup</button>
       </div>
@@ -114,35 +114,37 @@
   </div>
 </div>
 
+<!-- ===== SPLASH SCREEN ===== -->
 <div id="splash-screen" style="
   position: fixed; inset: 0; z-index: 99999;
-  background: #0a0a0a;
+  background: var(--bg-primary, #0f0f1a);
   display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 20px;
+  align-items: center; justify-content: center; gap: 24px;
 ">
-  <svg viewBox="0 0 270 65" xmlns="http://www.w3.org/2000/svg" style="width:220px; height:53px; animation: splashFadeIn 0.4s ease forwards;">
+  <svg viewBox="0 0 270 65" xmlns="http://www.w3.org/2000/svg" style="width:240px; height:58px; animation: splashFadeIn 0.5s ease forwards;">
     <text x="135" y="58" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-weight="800" font-size="56" letter-spacing="-2">
-      <tspan fill="#ffffff">cashir</tspan><tspan fill="#22c55e">qu</tspan>
+      <tspan fill="#ffffff">cashir</tspan><tspan fill="#3dbf8a">qu</tspan>
     </text>
   </svg>
-  <div style="display:flex; gap: 6px; align-items: center;">
+  <div style="display:flex; gap: 8px; align-items: center;">
     <div class="splash-dot" style="animation-delay: 0s;"></div>
     <div class="splash-dot" style="animation-delay: 0.15s;"></div>
     <div class="splash-dot" style="animation-delay: 0.3s;"></div>
   </div>
+  <p style="color: #9a9ab0; font-size: 0.85rem; margin-top: -8px; font-family: Inter, sans-serif;">Menghubungkan...</p>
 </div>
 <style>
-  @keyframes splashFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes splashFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
   .splash-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: #22c55e; animation: splashBounce 0.8s infinite ease-in-out;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #3dbf8a; animation: splashBounce 0.8s infinite ease-in-out;
   }
   @keyframes splashBounce {
-    0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
-    40% { transform: scale(1.1); opacity: 1; }
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1.2); opacity: 1; }
   }
   #splash-screen.fade-out {
-    animation: splashOut 0.3s ease forwards;
+    animation: splashOut 0.35s ease forwards;
   }
   @keyframes splashOut {
     from { opacity: 1; }
@@ -156,9 +158,9 @@
   <!-- === SCREEN 1: PILIH LOGIN === -->
   <div class="auth-container" id="login-screen">
     <div style="display:flex; justify-content:center; margin-bottom:16px;">
-      <svg viewBox="0 0 270 65" xmlns="http://www.w3.org/2000/svg" style="width:200px; height:48px;">
+      <svg viewBox="0 0 270 65" xmlns="http://www.w3.org/2000/svg" style="width:230px; height:55px;">
         <text x="135" y="58" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-weight="800" font-size="56" letter-spacing="-2">
-          <tspan fill="#ffffff">cashir</tspan><tspan fill="#22c55e">qu</tspan>
+          <tspan fill="#ffffff">cashir</tspan><tspan fill="#3dbf8a">qu</tspan>
         </text>
       </svg>
     </div>
@@ -167,7 +169,7 @@
     <!-- Kartu Owner -->
     <div class="auth-card">
       <div class="auth-card-header">
-        <span class="auth-card-icon" style="font-size:1rem;">O</span>
+        <span class="auth-card-icon">💼</span>
         <div>
           <div class="auth-card-title">Saya Owner / Pemilik</div>
           <div class="auth-card-desc" id="owner-card-desc">Login dengan akun Google Anda</div>
@@ -187,7 +189,7 @@
     <!-- Kartu Staff -->
     <div class="auth-card">
       <div class="auth-card-header">
-        <span class="auth-card-icon" style="font-size:0.85rem; font-weight:700;">S</span>
+        <span class="auth-card-icon">🧑‍🍳</span>
         <div>
           <div class="auth-card-title">Saya Staff</div>
           <div class="auth-card-desc">Masukkan kode yang diberikan Owner</div>
@@ -200,7 +202,7 @@
           oninput="if(this.value.length>8)this.value=this.value.slice(0,8)"
           style="letter-spacing: 3px; font-size: 1.2rem; font-weight: 700; text-align: center;">
         <button class="btn btn-primary" id="btn-staff-login" onclick="loginAsKaryawan()" style="white-space:nowrap; padding: 12px 20px;">
-          Masuk
+          ✅ Masuk
         </button>
       </div>
     </div>
@@ -230,7 +232,7 @@
           margin:0 auto 8px; cursor:pointer; overflow:hidden;
           background:#1a1a24; transition:border-color 0.2s;
         ">
-          <span id="logo-upload-icon" style="font-size:28px; color:var(--text-3);">+</span>
+          <span id="logo-upload-icon" style="font-size:28px;">🏪</span>
           <img id="logo-upload-img" src="" style="width:100%;height:100%;object-fit:cover;display:none;" alt="Logo">
         </div>
         <p style="font-size:0.75rem; color:#9a9ab0; margin:0;">Ketuk untuk pilih foto</p>
@@ -244,7 +246,7 @@
         <p class="form-hint" style="margin-top: 6px;">Kode staff akan otomatis dibuat dan dikirim ke Gmail Anda.</p>
       </div>
       <button class="welcome-btn" id="btn-create-shop" onclick="createNewShop()" style="margin-top: 16px;">
-        Buat Warung &amp; Dapatkan Kode
+        🚀 Buat Warung &amp; Dapatkan Kode
       </button>
     </div>
   </div>
@@ -267,7 +269,7 @@
       <div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <h1 id="shop-title-display">KASIR WARUNG</h1>
-          <button class="edit-name-btn" id="edit-shop-name-btn" onclick="editShopName()" title="Ubah Nama Warung">✎</button>
+          <button class="edit-name-btn" id="edit-shop-name-btn" onclick="editShopName()" title="Ubah Nama Warung">✏️</button>
         </div>
         <div class="subtitle" id="current-date"></div>
       </div>
@@ -275,15 +277,19 @@
 
     <nav class="nav-tabs">
       <button class="nav-tab active" data-page="kasir" onclick="switchPage('kasir')">
+        <span class="tab-icon">🛒</span>
         <span class="tab-text">Kasir</span>
       </button>
       <button class="nav-tab" data-page="keuangan" id="nav-keuangan" onclick="switchPage('keuangan')">
+        <span class="tab-icon">📊</span>
         <span class="tab-text">Keuangan</span>
       </button>
       <button class="nav-tab" data-page="riwayat" id="nav-riwayat" onclick="switchPage('riwayat')">
+        <span class="tab-icon">📋</span>
         <span class="tab-text">Riwayat</span>
       </button>
       <button class="nav-tab" data-page="menu" onclick="switchPage('menu')">
+        <span class="tab-icon">⚙️</span>
         <span class="tab-text">Kelola Menu</span>
       </button>
     </nav>
@@ -292,19 +298,19 @@
       <!-- User Profile & Badge -->
       <div class="user-role-badge" id="header-user-badge">
         <img id="user-avatar" src="" alt="" style="display:none; width:28px; height:28px; border-radius:50%; border: 2px solid var(--accent-primary); object-fit:cover;">
-        <span class="badge-role" id="role-badge-text">Owner</span>
-        <span class="badge-token-info hide-mobile" id="token-badge-text" title="Klik untuk salin kode staff" onclick="copyEmployeeToken()" style="cursor:pointer;">Kode: —</span>
+        <span class="badge-role" id="role-badge-text">💼 Owner</span>
+        <span class="badge-token-info" id="token-badge-text" title="Klik untuk salin kode staff" onclick="copyEmployeeToken()" style="cursor:pointer;">Kode: — 📋</span>
       </div>
       
       <div class="header-buttons" style="display: flex; gap: 8px;">
-        <button class="btn btn-secondary btn-icon" id="btn-connect-printer" onclick="connectBluetoothPrinter()" title="Sambungkan Printer Bluetooth" style="padding: 8px 14px; font-size: 0.78rem; font-weight:600;">
-          Print
+        <button class="btn btn-secondary btn-icon" id="btn-connect-printer" onclick="connectBluetoothPrinter()" title="Sambungkan Printer Bluetooth" style="padding: 8px 14px; font-size: 1.1rem;">
+          🖨️
         </button>
-        <button class="btn btn-success btn-icon" onclick="exportToExcel()" title="Export ke Excel" style="padding: 8px 14px; font-size: 0.78rem; font-weight:600;">
-          Excel
+        <button class="btn btn-success btn-icon" onclick="exportToExcel()" title="Export ke Excel" style="padding: 8px 14px; font-size: 1.1rem;">
+          📥
         </button>
-        <button class="btn btn-secondary btn-icon" onclick="logout()" title="Keluar" id="btn-logout" style="padding: 8px 14px; font-size: 0.78rem; font-weight:600;">
-          Keluar
+        <button class="btn btn-secondary btn-icon" onclick="logout()" title="Keluar" id="btn-logout" style="padding: 8px 14px; font-size: 1.1rem;">
+          🚪
         </button>
       </div>
     </div>
@@ -317,11 +323,11 @@
       <!-- Menu Area -->
       <div class="section-card">
         <div class="section-header">
-          <h2 class="section-title">Daftar Menu</h2>
-          <button class="btn btn-secondary" onclick="showExpenseModal()" style="padding: 8px 14px; font-size: 0.8rem;">+ Pengeluaran</button>
+          <h2 class="section-title"><span class="icon">🍽️</span> Daftar Menu</h2>
+          <button class="btn btn-secondary" onclick="showExpenseModal()" style="padding: 8px 12px; font-size: 0.85rem; border-color: var(--accent-primary); color: var(--accent-primary);">💸 Catat Pengeluaran</button>
         </div>
         <div class="search-bar-container" style="margin-bottom: 12px;">
-          <input type="text" id="menu-search-input" class="form-input" placeholder="Cari nama menu..." oninput="renderMenuGrid()" style="width: 100%; padding: 10px 14px; border-radius: 8px;">
+          <input type="text" id="menu-search-input" class="form-input" placeholder="🔍 Cari nama menu..." oninput="renderMenuGrid()" style="width: 100%; padding: 10px 14px; border-radius: 8px;">
         </div>
         <div class="category-filters" id="category-filters"></div>
         <div class="menu-grid" id="menu-grid"></div>
@@ -330,8 +336,8 @@
       <!-- Cart Area -->
       <div class="section-card cart-section">
         <div class="section-header">
-          <h2 class="section-title">Keranjang</h2>
-          <button class="btn btn-danger btn-icon" onclick="clearCart()" title="Kosongkan" style="padding:8px 12px;font-size:0.75rem;">Hapus</button>
+          <h2 class="section-title"><span class="icon">🛒</span> Keranjang</h2>
+          <button class="btn btn-danger btn-icon" onclick="clearCart()" title="Kosongkan" style="padding:8px 12px;font-size:0.75rem;">🗑</button>
         </div>
 
         <div class="cart-items" id="cart-items"></div>
@@ -353,108 +359,93 @@
   <!-- ===== PAGE: KEUANGAN (Dashboard) ===== -->
   <section id="page-keuangan" class="page-section">
 
-    <!-- Header & Period Selector -->
-    <div class="dashboard-header">
-      <h2 class="section-title" style="font-size:1.1rem; margin-bottom:0;">Keuangan</h2>
-      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
-        <div class="period-selector">
-          <button class="period-btn" data-period="hari" onclick="setPeriod('hari')">Hari</button>
-          <button class="period-btn active" data-period="minggu" onclick="setPeriod('minggu')">Minggu</button>
-          <button class="period-btn" data-period="bulan" onclick="setPeriod('bulan')">Bulan</button>
-          <button class="period-btn" data-period="semua" onclick="setPeriod('semua')">Semua</button>
-        </div>
-        <button onclick="emergencyCleanData()" class="btn-clean-data">Bersihkan</button>
+    <!-- Period Selector -->
+    <div class="flex items-center justify-between mb-8" style="margin-bottom:16px;">
+      <h2 class="section-title" style="font-size:1.1rem;"><span class="icon">📊</span> Dashboard Keuangan</h2>
+      <div class="period-selector">
+        <button class="period-btn active" data-period="hari" onclick="setPeriod('hari')">Hari Ini</button>
+        <button class="period-btn" data-period="minggu" onclick="setPeriod('minggu')">Minggu</button>
+        <button class="period-btn" data-period="bulan" onclick="setPeriod('bulan')">Bulan</button>
+        <button class="period-btn" data-period="semua" onclick="setPeriod('semua')">Semua</button>
       </div>
     </div>
 
-    <!-- Stat Cards: 2x2 grid -->
-    <div class="dashboard-grid-top">
+    <!-- Stat Cards -->
+    <div class="dashboard-grid">
       <div class="stat-card accent">
-        <div class="sc-label">Pemasukan</div>
-        <div class="sc-value text-success" id="stat-income">Rp 0</div>
+        <div class="sc-icon">💰</div>
+        <div class="sc-label">Total Pemasukan</div>
+        <div class="sc-value" id="stat-income">Rp 0</div>
         <div class="sc-sub" id="stat-income-sub">Hari Ini</div>
       </div>
-      <div class="stat-card danger">
-        <div class="sc-label">Pengeluaran</div>
-        <div class="sc-value text-danger" id="stat-expense">Rp 0</div>
+      <div class="stat-card" style="border-left: 4px solid var(--danger, #ef4444);">
+        <div class="sc-icon">💸</div>
+        <div class="sc-label">Total Pengeluaran</div>
+        <div class="sc-value" id="stat-expense" style="color: var(--danger, #ef4444);">Rp 0</div>
         <div class="sc-sub" id="stat-expense-sub">Hari Ini</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card success">
+        <div class="sc-icon">✨</div>
         <div class="sc-label">Laba Bersih</div>
         <div class="sc-value" id="stat-net-profit">Rp 0</div>
         <div class="sc-sub" id="stat-net-profit-sub">Hari Ini</div>
       </div>
-      <div class="stat-card">
-        <div class="sc-label">Transaksi</div>
+      <div class="stat-card success" style="border-left-color: #3dbf8a;">
+        <div class="sc-icon">🧾</div>
+        <div class="sc-label">Jumlah Transaksi</div>
         <div class="sc-value" id="stat-txn">0</div>
         <div class="sc-sub" id="stat-txn-sub">Hari Ini</div>
       </div>
-    </div>
-
-    <!-- Stat Cards: Row 2 -->
-    <div class="dashboard-grid-bottom" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-bottom:24px;">
-      <div class="stat-card" style="display:flex; align-items:center; gap:16px; padding:16px;">
-        <div class="sc-icon-box" style="width:40px; height:40px; background:var(--green-dim); color:var(--green); border-radius:8px; display:flex; align-items:center; justify-content:center;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        </div>
-        <div>
-          <div class="sc-label">Rata-rata per Transaksi</div>
-          <div class="sc-value" id="stat-avg" style="font-size:1.1rem;">Rp 0</div>
-        </div>
+      <div class="stat-card info">
+        <div class="sc-icon">📈</div>
+        <div class="sc-label">Rata-rata</div>
+        <div class="sc-value" id="stat-avg">Rp 0</div>
+        <div class="sc-sub" id="stat-avg-sub">per transaksi</div>
       </div>
-      <div class="stat-card" style="display:flex; align-items:center; gap:16px; padding:16px;">
-        <div class="sc-icon-box" style="width:40px; height:40px; background:rgba(59, 130, 246, 0.1); color:#3b82f6; border-radius:8px; display:flex; align-items:center; justify-content:center;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-        </div>
-        <div>
-          <div class="sc-label">Item Terjual</div>
-          <div class="sc-value" id="stat-items" style="font-size:1.1rem;">0 item terjual</div>
-        </div>
+      <div class="stat-card purple">
+        <div class="sc-icon">📦</div>
+        <div class="sc-label">Item Terjual</div>
+        <div class="sc-value" id="stat-items">0</div>
+        <div class="sc-sub" id="stat-items-sub">item terjual</div>
       </div>
     </div>
 
-    <!-- Charts & Top Items -->
-    <div class="chart-grid" style="display:grid; grid-template-columns:2fr 1fr; gap:16px;">
-      <div class="chart-card stat-card" style="padding:20px;">
-        <div class="chart-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-          <h3 class="chart-title" style="font-size:1rem; font-weight:600;">Grafik Pemasukan (7 Hari Terakhir)</h3>
-          <div style="font-size:0.75rem; color:var(--text-3); display:flex; align-items:center; gap:6px;">
-            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--green);"></span> Pemasukan Harian
-          </div>
+
+    <!-- Charts -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">📊 Grafik Pemasukan</h3>
         </div>
         <div style="height:300px;"><canvas id="income-chart"></canvas></div>
       </div>
-      <div class="chart-card stat-card" style="padding:20px;">
-        <div class="chart-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-          <h3 class="chart-title" style="font-size:1rem; font-weight:600; display:flex; align-items:center; gap:8px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            Menu Terlaris
-          </h3>
-          <a href="#" onclick="switchPage('riwayat')" style="font-size:0.75rem; color:var(--green); text-decoration:none;">Lihat Semua</a>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">🏆 Menu Terlaris</h3>
         </div>
-        <div class="top-menu-list" id="top-items-list" style="display:flex; flex-direction:column; gap:12px;">
-          <!-- Menu list injected here via JS -->
-        </div>
+        <div style="height:300px;"><canvas id="top-items-chart"></canvas></div>
       </div>
+    </div>
+
+    <!-- Top Items Table -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title"><span class="icon">🥇</span> Top Menu Berdasarkan Pendapatan</h2>
+      </div>
+      <div class="section-body" id="top-items-table"></div>
     </div>
 
   </section>
 
   <!-- ===== PAGE: RIWAYAT ===== -->
   <section id="page-riwayat" class="page-section">
-    <div class="section-card" style="padding:20px;">
-      <div class="section-header" style="padding:0; border:none; margin-bottom:20px; flex-wrap:wrap; gap:16px;">
-        <div>
-          <h2 class="section-title" style="font-size:1.1rem; margin-bottom:4px;">Riwayat Transaksi</h2>
-          <p style="color:var(--text-3); font-size:0.85rem;">Laporan riwayat pembayaran dan rekap shift kasir</p>
-        </div>
-        <div class="riwayat-controls" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <div style="position:relative; display:flex; align-items:center;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute; left:10px; color:var(--text-3);"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <input type="date" class="date-input" id="history-date" style="padding-left:32px; background:transparent; border:1px solid var(--border); color:var(--text); border-radius:6px; padding:8px 8px 8px 32px; font-family:inherit; font-size:0.85rem;">
-          </div>
-          <button class="btn" onclick="showClosingModal()" style="padding: 8px 12px; font-size: 0.85rem; background:var(--green-dim); color:var(--green); border:1px solid var(--green-border);">Rekap Shift</button>
-          <button class="btn btn-secondary" onclick="exportToExcel()" id="btn-export-excel" style="padding: 8px 12px; font-size: 0.85rem; background:transparent; border:1px solid var(--border);">Ekspor Excel</button>
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title"><span class="icon">📋</span> Riwayat Transaksi</h2>
+        <div class="riwayat-controls" style="display:flex; gap:8px; align-items:center;">
+          <input type="date" class="date-input" id="history-date">
+          <button class="btn btn-primary" onclick="showClosingModal()" style="padding: 8px; font-size: 0.9rem;">💼 Rekap Shift</button>
+          <button class="btn btn-secondary" onclick="exportToExcel()" id="btn-export-excel" style="padding: 8px; font-size: 0.9rem;">⬇️ Excel</button>
         </div>
       </div>
       <div class="daily-summary" id="history-summary"></div>
@@ -464,18 +455,15 @@
 
   <!-- ===== PAGE: KELOLA MENU ===== -->
   <section id="page-menu" class="page-section">
-    <div class="section-card" style="padding:20px;">
-      <div class="section-header" style="padding:0; border:none; margin-bottom:20px; flex-wrap:wrap; gap:16px;">
-        <div>
-          <h2 class="section-title" style="font-size:1.1rem; margin-bottom:4px;">Daftar Menu Warung</h2>
-          <p style="color:var(--text-3); font-size:0.85rem;">Kelola, tambah, dan edit produk warung Anda</p>
-        </div>
-        <div class="riwayat-controls" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-          <div class="search-box" style="position:relative; display:flex; align-items:center;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute; left:12px; color:var(--text-3);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="menu-search" placeholder="Cari menu..." style="padding:10px 12px 10px 36px; background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:8px; width:220px; font-size:0.85rem;">
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title"><span class="icon">⚙️</span> Kelola Menu</h2>
+        <div class="riwayat-controls">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="menu-search" placeholder="Cari menu...">
           </div>
-          <button class="btn btn-primary" onclick="showAddMenuModal()" style="padding:10px 16px; background:var(--green); color:#000; font-weight:600; border:none;">+ Tambah Menu</button>
+          <button class="btn btn-primary" onclick="showAddMenuModal()">➕ Tambah Menu</button>
         </div>
       </div>
       <div id="menu-manage-list"></div>
@@ -498,7 +486,7 @@
 
 <!-- ===== SUCCESS OVERLAY ===== -->
 <div class="success-overlay hidden" id="success-overlay">
-  <div class="success-icon-big" style="font-size:2.5rem; color:var(--green);">✓</div>
+  <div class="success-icon-big">✅</div>
   <div class="success-text">Transaksi Berhasil!</div>
   <div class="success-amount" id="success-amount">Rp 0</div>
 </div>
@@ -537,7 +525,7 @@
 <!-- ===== AUTHENTICATION OVERLAY ===== -->
 <div class="auth-overlay hidden" id="auth-overlay">
   <div class="auth-container">
-    <div class="auth-logo" style="width:44px;height:44px;background:var(--bg-3);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">C</div>
+    <div class="auth-logo">🏪</div>
     <h2 class="auth-title" id="auth-title">Memuat...</h2>
     
     <!-- Loading View -->
@@ -556,7 +544,7 @@
         <label class="form-label">Buat PIN Owner (Angka)</label>
         <input type="password" class="form-input" id="setup-owner-pin" placeholder="cth: 123456" inputmode="numeric">
       </div>
-      <button class="btn btn-primary" onclick="submitSetup()" style="width: 100%; margin-top: 10px;">Buat Warung Sekarang</button>
+      <button class="btn btn-primary" onclick="submitSetup()" style="width: 100%; margin-top: 10px;">🚀 Buat Warung Sekarang</button>
     </div>
 
     <!-- Login View -->
@@ -564,8 +552,8 @@
       <p style="margin-bottom: 20px; color: var(--text-secondary); font-size: 0.9rem;">Silakan pilih peran untuk masuk ke dalam aplikasi kasir.</p>
       
       <div style="display:flex; gap:10px; margin-bottom: 20px;">
-        <button class="btn btn-secondary" id="tab-login-owner" onclick="setLoginTab('owner')" style="flex:1; border-color:var(--accent-primary); color:var(--accent-primary);">Owner</button>
-        <button class="btn btn-secondary" id="tab-login-staff" onclick="setLoginTab('staff')" style="flex:1;">Staff</button>
+        <button class="btn btn-secondary" id="tab-login-owner" onclick="setLoginTab('owner')" style="flex:1; border-color:var(--accent-primary); color:var(--accent-primary);">👤 Owner</button>
+        <button class="btn btn-secondary" id="tab-login-staff" onclick="setLoginTab('staff')" style="flex:1;">👨‍💼 Staff</button>
       </div>
 
       <div id="login-owner-form">
@@ -591,7 +579,7 @@
 <div class="modal-overlay hidden" id="receipt-modal-overlay">
   <div class="modal" style="max-width: 400px;">
     <div class="modal-header">
-      <h3 style="display: flex; align-items: center; gap: 8px;">Transaksi Berhasil!</h3>
+      <h3 style="display: flex; align-items: center; gap: 8px;">🎉 Transaksi Berhasil!</h3>
       <button class="modal-close" onclick="closeReceiptModal()">✕</button>
     </div>
     <div class="modal-body" style="padding: 16px; background: #1a1a24;">
