@@ -23,13 +23,30 @@ const EMAILJS_SERVICE_ID  = 'service_z60uuh3';
 const EMAILJS_TEMPLATE_ID = 'un0o4i4';
 const EMAILJS_PUBLIC_KEY  = '32l231VSYp-GBDcsJ';
 
-try {
-  firebase.initializeApp(firebaseConfig);
-  db   = firebase.firestore();
-  auth = firebase.auth();
-} catch (e) {
-  console.error("Firebase init failed:", e);
-  alert("Sistem database gagal dimuat. Pastikan Anda terhubung ke internet.");
+// Firebase diinisiasi setelah halaman selesai dimuat
+// agar CDN script punya waktu cukup sebelum dipanggil
+function initFirebase() {
+  if (typeof firebase === 'undefined') {
+    // CDN belum siap, coba lagi 1 detik kemudian (max 10x)
+    if ((initFirebase._retry = (initFirebase._retry || 0) + 1) < 10) {
+      setTimeout(initFirebase, 1000);
+    } else {
+      alert("Sistem database gagal dimuat. Pastikan Anda terhubung ke internet lalu refresh halaman.");
+    }
+    return;
+  }
+  try {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    db   = firebase.firestore();
+    auth = firebase.auth();
+    // Setelah Firebase siap, baru jalankan app
+    if (typeof init === 'function') init();
+  } catch (e) {
+    console.error("Firebase init failed:", e);
+    alert("Sistem database gagal dimuat. Pastikan Anda terhubung ke internet lalu refresh halaman.");
+  }
 }
 
 // --- App State ---
@@ -2771,3 +2788,7 @@ function showClosingModal() {
   `;
   modal.classList.remove('hidden');
 }
+
+
+// Jalankan Firebase Init saat script dimuat
+initFirebase();
